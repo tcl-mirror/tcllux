@@ -1,0 +1,21 @@
+#
+# Test TclLuX_itimer
+#
+
+package require Tcl 8.5
+package require tcltest 2
+namespace import ::tcltest::test
+
+package require tcllux::itimer
+namespace import tcllux::lux
+
+
+test tcllux_itimer-0.0 {Free test pass for getting this far} -body {} -result {}
+
+
+# cleanup
+::tcltest::cleanupTests
+flush stdout
+return
+
+# EOF

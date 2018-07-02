@@ -1,0 +1,23 @@
+what:	TclLuX Uname
+where:	https://chiselapp.com/user/stwo/repository/tcllux
+who:	Stuart Cassoff <stwo@users.sourceforge.net>
+why:	Uname information
+when:	Summer 2018
+how:	$ /path/to/configure ?options? && make
+how:	$ make test
+how:	$ make install
+need:	Tcl, POSIX
+ver:	0.1
+
+
+The TclLux Uname Tcl extension provides uname information.
+
+
+This package should build easily on any POSIX system.
+
+This package uses Spot o' Conf to configure and build.
+
+By default, this package will be configured to build
+threaded for Tcl 8.6 (threaded) on OpenBSD.
+
+

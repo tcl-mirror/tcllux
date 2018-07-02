@@ -1,0 +1,28 @@
+[manpage_begin tcllux::chroot n 1.0]
+[require   Tcl 8.6]
+[require   tcllux::chroot [opt 1.0]]
+[moddesc   {tcllux::chroot}]
+[titledesc {TclLux chroot}]
+[category  {UNIX}]
+[copyright {2018 Stuart Cassoff <stwo@users.sourceforge.net>}]
+[keywords  unix chroot]
+[see_also  chroot(2)]
+
+[description]
+
+	The TclLux chroot Tcl extension provides
+	chroot functionality.
+
+[section COMMANDS]
+
+[usage namespace import ::tcllux::lux]
+
+[list_begin definitions]
+
+	[call [cmd {lux chroot}] [arg path]]
+		Changes the root directory to [arg path].
+		Returns an empty string.
+
+[list_end]
+
+[manpage_end]

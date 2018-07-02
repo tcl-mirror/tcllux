@@ -1,0 +1,40 @@
+[manpage_begin tcllux::rusage n 1.0]
+[require   Tcl 8.6]
+[require   tcllux::rusage [opt 1.0]]
+[moddesc   {tcllux::rusage}]
+[titledesc {TclLux rusage}]
+[category  {UNIX}]
+[copyright {2018 Stuart Cassoff <stwo@users.sourceforge.net>}]
+[keywords  unix rusage]
+[see_also  getrusage(2)]
+
+[description]
+
+	The TclLux rusage Tcl extension provides
+	rusage information.
+
+[section COMMANDS]
+
+[usage namespace import ::tcllux::lux]
+
+[list_begin definitions]
+
+	[call [cmd {lux rusage}] [opt [arg who]]]
+
+	[list_begin options]
+
+		[opt_def [option self]]
+			This is the default if [arg who] isn't provided.
+			Returns rusage information about the current process.
+
+		[opt_def [option children]]
+			Returns rusage information about the terminated children of the current process.
+
+		[opt_def [option thread]]
+			Returns rusage information about the current thread.
+
+	[list_end]
+
+[list_end]
+
+[manpage_end]

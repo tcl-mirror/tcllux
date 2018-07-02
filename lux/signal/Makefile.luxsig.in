@@ -1,0 +1,10 @@
+lux-signal-dist: lux-dist
+	$(DIST_INSTALL_DATA) ${srcdir}/Makefile.luxsig.in $(DIST_DIR)/
+	$(INSTALL_DATA_DIR) $(DIST_DIR)/examples
+	DIR=examples; \
+	list='signals.tcl'; \
+	for p in $$list; do \
+	    $(DIST_INSTALL_DATA) ${srcdir}/$$DIR/$$p $(DIST_DIR)/$$DIR/; \
+	done
+
+.PHONY: lux-signal-dist

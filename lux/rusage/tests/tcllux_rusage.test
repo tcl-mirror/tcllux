@@ -1,0 +1,116 @@
+#
+# Test TclLuX_rusage
+#
+
+# Init
+package require Tcl 8.5
+if {[package provide tcltest] eq ""} {
+	package require tcltest 2
+	tcltest::configure {*}$::argv -testdir [file dir [info script]]
+	namespace import ::tcltest::test
+}
+
+if {[llength [info commands ::tcltest::setup]] == 1} {
+	namespace import ::tcltest::setup
+} else {
+	proc setup {script} {
+		uplevel 1 $script
+	}
+}
+if {[llength [info commands ::tcltest::cleanup]] == 1} {
+	namespace import ::tcltest::cleanup
+} else {
+	proc cleanup {script} {
+		uplevel 1 $script
+	}
+}
+if {[llength [info commands ::tcltest::testSetup]] == 1} {
+	namespace import ::tcltest::testSetup
+} else {
+	proc testSetup {name script} {
+		uplevel 1 $script
+	}
+}
+if {[llength [info commands ::tcltest::testCleanup]] == 1} {
+	namespace import ::tcltest::testCleanup
+} else {
+	proc testCleanup {name script} {
+		uplevel 1 $script
+	}
+}
+
+
+setup {
+	package require tcllux::rusage
+	namespace import tcllux::*
+}
+
+
+test tcllux_rusage-1.0 {lux namespace exists} -body {
+	namespace exists tcllux
+} -result 1
+
+test tcllux_rusage-1.1 {lux namespace ensemble exists} -body {
+	namespace ensemble exists tcllux::lux
+} -result 1
+
+test tcllux_rusage-1.2 {lux rusage ensemble command configuration} -body {
+	namespace ensemble configure tcllux::lux
+} -result {-map {} -namespace ::tcllux::lux -parameters {} -prefixes 0 -subcommands {} -unknown {}}
+
+test tcllux_rusage-1.3 {lux rusage ensemble exports} -body {
+	namespace eval tcllux::lux { namespace export }
+} -result rusage
+
+test tcllux_rusage-1.4 {lux rusage ensemble command args} -body {
+	tcllux::lux rusage me
+} -returnCodes {error} -result {bad who "me": must be self, children or thread}
+
+
+test tcllux_rusage-1.5 {lux rusage keys: default (self)} -body {
+	dict keys [tcllux::lux rusage]
+} -result {rusage utime stime maxrss ixrss idrss isrss minflt majflt nswap inblock oublock msgsnd msgrcv nsignals nivcsw}
+
+
+test tcllux_rusage-1.6 {lux rusage keys: self} -body {
+	dict keys [tcllux::lux rusage self]
+} -result {rusage utime stime maxrss ixrss idrss isrss minflt majflt nswap inblock oublock msgsnd msgrcv nsignals nivcsw}
+
+
+test tcllux_rusage-1.7 {lux rusage keys: children} -body {
+	dict keys [tcllux::lux rusage children]
+} -result {rusage utime stime maxrss ixrss idrss isrss minflt majflt nswap inblock oublock msgsnd msgrcv nsignals nivcsw}
+
+
+test tcllux_rusage-1.8 {lux rusage keys: thread} -body {
+	dict keys [tcllux::lux rusage thread]
+} -result {rusage utime stime maxrss ixrss idrss isrss minflt majflt nswap inblock oublock msgsnd msgrcv nsignals nivcsw}
+
+
+test tcllux_rusage-1.9 {lux rusage values: rusage key: default (self)} -body {
+	dict get [tcllux::lux rusage] rusage
+} -result self
+
+
+test tcllux_rusage-1.10 {lux rusage values: rusage key: self} -body {
+	dict get [tcllux::lux rusage self] rusage
+} -result self
+
+
+test tcllux_rusage-1.11 {lux rusage values: rusage key: children} -body {
+	dict get [tcllux::lux rusage children] rusage
+} -result children
+
+
+test tcllux_rusage-1.12 {lux rusage values: rusage key: thread} -body {
+	dict get [tcllux::lux rusage thread] rusage
+} -result thread
+
+
+cleanup {
+::tcltest::cleanupTests
+flush stdout
+}
+return
+
+# EOF

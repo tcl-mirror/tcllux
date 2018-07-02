@@ -1,0 +1,27 @@
+[manpage_begin tcllux::uname n 1.0]
+[require   Tcl 8.6]
+[require   tcllux::uname [opt 1.0]]
+[moddesc   {tcllux::uname}]
+[titledesc {TclLux uname}]
+[category  {UNIX}]
+[copyright {2018 Stuart Cassoff <stwo@users.sourceforge.net>}]
+[keywords  unix uname]
+[see_also  uname(3)]
+
+[description]
+
+	The TclLux uname Tcl extension provides
+	uname information.
+
+[section COMMANDS]
+
+[usage namespace import ::tcllux::lux]
+
+[list_begin definitions]
+
+	[call [cmd {lux uname}]]
+		Returns a dict. Keys: sysname nodename release version machine.
+
+[list_end]
+
+[manpage_end]

@@ -1,0 +1,28 @@
+[manpage_begin itimer n 1.0]
+[require   Tcl 8.6]
+[require   tcllux::itimer [opt 1.0]]
+[moddesc   {lux itimer}]
+[titledesc {TclLux itimer}]
+[category  {UNIX}]
+[copyright {2018 Stuart Cassoff <stwo@users.sourceforge.net>}]
+[keywords  unix itimer]
+[see_also  itimer(3)]
+
+[description]
+
+	The TclLux itimer Tcl extension provides
+	itimer information.
+
+[section COMMANDS]
+
+[usage namespace import ::tcllux::lux]
+
+[list_begin definitions]
+
+	[call [cmd {lux itimers}]]
+	[call [cmd {lux get}]]
+	[call [cmd {lux set}]]
+
+[list_end]
+
+[manpage_end]

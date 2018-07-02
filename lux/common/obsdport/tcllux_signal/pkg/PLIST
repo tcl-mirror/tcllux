@@ -1,0 +1,7 @@
+@comment $OpenBSD$
+lib/tcl/tcllux_signal/
+lib/tcl/tcllux_signal/libtcllux_signal.so
+lib/tcl/tcllux_signal/pkgIndex.tcl
+share/doc/tcllux_signal/
+share/doc/tcllux_signal/LICENSE
+share/doc/tcllux_signal/tcllux_signal.txt

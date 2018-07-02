@@ -1,0 +1,29 @@
+[manpage_begin tcllux::umask n 1.0]
+[require   Tcl 8.6]
+[require   tcllux::umask [opt 1.0]]
+[moddesc   {tcllux::umask}]
+[titledesc {TclLux umask}]
+[category  {UNIX}]
+[copyright {2018 Stuart Cassoff <stwo@users.sourceforge.net>}]
+[keywords  unix umask]
+[see_also  umask(2)]
+
+[description]
+
+	The TclLux umask Tcl extension provides
+	umask functionality.
+
+[section COMMANDS]
+
+[usage namespace import ::tcllux::lux]
+
+[list_begin definitions]
+
+	[call [cmd {lux umask}] [opt [arg mask]]]
+		Gets or sets the umask.
+		Getting returns current umask.
+		Setting returns previous umask.
+
+[list_end]
+
+[manpage_end]

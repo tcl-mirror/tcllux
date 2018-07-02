@@ -1,0 +1,48 @@
+[manpage_begin tcllux::chan n 1.0]
+[require   Tcl 8.6]
+[require   tcllux::chan [opt 1.0]]
+[moddesc   {tcllux::chan}]
+[titledesc {TclLux chan}]
+[category  {UNIX}]
+[copyright {2018 Stuart Cassoff <stwo@users.sourceforge.net>}]
+[keywords  unix chan]
+[see_also  fcntl(2) sync(2) fsync(2)]
+
+[description]
+
+	The TclLux chan Tcl extension provides
+	chan functionality.
+
+[section COMMANDS]
+
+[usage namespace import ::tcllux::lux]
+
+[list_begin definitions]
+
+	[call [cmd {lux chan configure}] [arg channelId] [opt [arg name]] [opt [arg val]] [opt [arg ...]]]
+		Configures the [arg channelId].
+		Returns an empty string when setting.
+
+	[call [cmd {lux chan sync}]]
+		System sync.
+		Returns an empty string.
+
+	[call [cmd {lux chan fsync}] [arg channelId]]
+		Syncs the [arg channelId].
+		Returns an empty string.
+
+	[call [cmd {lux chan fdatasync}] [arg channelId]]
+		Datasyncs the [arg channelId].
+		Returns an empty string.
+
+	[call [cmd {lux chan dup}] [arg channelId]]
+		Duplicates the [arg channelId] to a new channelId.
+		Returns the new channelId.
+
+	[call [cmd {lux chan write}] [arg channelId] [arg data]]
+		Writes [arg data] to [arg channelId].
+		Returns the number of bytes written to [arg channelId].
+
+[list_end]
+
+[manpage_end]

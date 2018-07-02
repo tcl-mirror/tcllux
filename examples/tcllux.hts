@@ -1,0 +1,19 @@
+apply {ts {
+    $ts interp		tclsh8.6
+    $ts dir		../lux
+#    $ts env		TCLLIBPATH=tcltest2k
+    $ts verbose		bstepCSd
+    $ts debug		0
+    $ts singleproc	0
+    $ts preservecore	0
+    $ts match		{}
+    $ts skip		{}
+    $ts matchfiles	{}
+    $ts skipfiles	{}
+    $ts testdir		{}
+    $ts tmpdir		{}
+    $ts constraints	{}
+    $ts limitconstraints 0
+    $ts add [testpackage new rusage/tests/tcllux_rusage.test  -name rusage -scan 1 -doc {|man -T ascii n lrange  | col -b}]
+    return $ts
+}} [testset new "Tcl tests"]

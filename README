@@ -1,0 +1,35 @@
+what:	TclLuX - Tcl with the luxury of UNIX
+where:	https://chiselapp.com/user/stwo/repository/tcllux
+who:	Stuart Cassoff <stwo@users.sourceforge.net>
+why:	UNIX
+when:	Summer 2018
+how:	$ /path/to/configure ?options? && make
+how:	$ make test
+how:	$ make install
+need:	Tcl, POSIX
+ver:	0.1
+
+
+TclLuX is a collection of packages,
+each offering some loosely-categorized
+form of UNIX functionality.
+
+There are no interdependencies.
+All packages are independent and
+can be built and used individually.
+
+The toplevel build setup works with
+all the packages as a group.
+
+Examples in the toplevel dir require
+two or more TclLuX packages.
+
+
+This package should build easily on any POSIX system.
+
+This package uses Spot o' Conf to configure and build.
+
+By default, this package will be configured to build
+threaded for Tcl 8.6 (threaded) on OpenBSD.
+
+

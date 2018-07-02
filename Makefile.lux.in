@@ -1,0 +1,76 @@
+LUX_PACKAGES = chan chroot itimer process rusage signal umask uname user
+
+lux: build
+
+configure: 
+	@for i in $(LUX_PACKAGES); do \
+	    if ! test -f $$i/Makefile; then \
+		$(INSTALL_DATA_DIR) $$i \
+		&& (cd $$i && ../${srcdir}/lux/$${i}/configure ${SPOTO_ARGS}); \
+	    fi; \
+	done
+
+build: configure
+	@for i in $(LUX_PACKAGES); do \
+	    (cd $$i && make); \
+	done
+
+lux-clean:
+	@for i in $(LUX_PACKAGES); do \
+	    (cd $$i && make clean); \
+	done
+
+lux-distclean:
+	@for i in $(LUX_PACKAGES); do \
+	    (cd $$i && make distclean) \
+	    && rmdir $$i; \
+	done && rm -f Makefile spoto.sed
+
+lux-test: all
+	@for i in $(LUX_PACKAGES); do \
+	    (cd $$i && make test); \
+	done
+
+lux-install: all
+	@ \
+	if ! expr X"$(DESTDIR)" : ^X'/..*' >/dev/null; then \
+	    $(E) 'DESTDIR must be an absolute path'; \
+	    exit 1; \
+	fi; \
+	for i in $(LUX_PACKAGES); do \
+	    (cd $$i && make install DESTDIR="$(DESTDIR)"); \
+	done
+
+lux-shell: all
+	@ \
+	TCLLIBPATH="$(TCLLIBPATH)"; \
+	for i in $(LUX_PACKAGES); do \
+	    TCLLIBPATH="$$TCLLIBPATH $$i"; \
+	done; \
+	TCLLIBPATH="$$TCLLIBPATH" ${TCLSH_PROG} $(SCRIPT)
+
+lux-dist: configure dist-spot
+	$(INSTALL_DATA_DIR) $(DIST_DIR)/examples
+	DIR=examples; \
+	list='itimer.tcl'; \
+	for p in $$list; do \
+	    $(DIST_INSTALL_SCRIPT) ${srcdir}/$$DIR/$$p $(DIST_DIR)/$$DIR/; \
+	done
+	$(INSTALL_DATA_DIR) $(DIST_DIR)/lux
+	pkgs='' && \
+	for i in $(LUX_PACKAGES); do \
+	    if expr $$i : '^tcllux_..*-.*$$' >/dev/null; then \
+		pkg=$$i; \
+	    else \
+		pkg=tcllux_$$i-$$(cd $$i && ../${srcdir}/lux/$${i}/configure --result | sed -n -E -e 's/PKG_VER .*{(..*)}$$/\1/p'); \
+	    fi; \
+	    pkgs="$$pkgs $$pkg"; \
+	    (cd $$i && make dist) \
+	    && tar xzf $(DIST_ROOT)/$$pkg.tar.gz -C $(DIST_DIR)/lux; \
+	done \
+	&& sed -E -e 's/^(LUX_PACKAGES =)..*$$/\1'"$$pkgs"'/' \
+		 < ${srcdir}/Makefile.lux.in > Makefile.lux.in.dist \
+	&& $(DIST_INSTALL_DATA) Makefile.lux.in.dist $(DIST_DIR)/Makefile.lux.in \
+	&& rm -f Makefile.lux.in.dist
+
+.PHONY: lux configure lux-clean lux-distclean lux-test lux-shell lux-dist

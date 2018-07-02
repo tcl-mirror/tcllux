@@ -1,0 +1,32 @@
+lux-dist: dist-spot
+	$(DIST_INSTALL_DATA) \
+	    ${srcdir}/Makefile.luxo.in ${srcdir}/luxo.conf \
+	    $(DIST_DIR)/
+	$(INSTALL_DATA_DIR) $(DIST_DIR)/ezt
+	DIR=ezt; \
+	list='README UNLICENSE \
+		ezt.h ezt_init.c ezt_funcs.c ezt_tj.h \
+		ezt_eagain_ewouldblock.h ezt_int2ptr_ptr2int.h'; \
+	for p in $$list; do \
+	    $(DIST_INSTALL_DATA) ${srcdir}/$$DIR/$$p $(DIST_DIR)/$$DIR/; \
+	done
+	$(INSTALL_DATA_DIR) $(DIST_DIR)/doc
+	DIR=doc; \
+	list='${NAME}.man ${NAME}.n ${NAME}.html'; \
+	for p in $$list; do \
+	    $(DIST_INSTALL_DATA) ${srcdir}/$$DIR/$$p $(DIST_DIR)/$$DIR/; \
+	done
+	$(INSTALL_DATA_DIR) $(DIST_DIR)/tests
+	DIR=tests; \
+	list='${TESTFWK} ${NAME}.test'; \
+	for p in $$list; do \
+	    $(DIST_INSTALL_DATA) ${srcdir}/$$DIR/$$p $(DIST_DIR)/$$DIR/; \
+	done
+	$(INSTALL_DATA_DIR) $(DIST_DIR)/unix
+	DIR=unix; \
+	list='${NAME}.c'; \
+	for p in $$list; do \
+	    $(DIST_INSTALL_DATA) ${srcdir}/$$DIR/$$p $(DIST_DIR)/$$DIR/; \
+	done
+
+.PHONY: lux-dist

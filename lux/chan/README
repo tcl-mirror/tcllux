@@ -1,0 +1,16 @@
+what:	Tclrusage 0.1
+where:
+who:	Stuart Cassoff <stwo@users.sourceforge.net>
+why:	Tcl rusage command
+when:	Spring 2017
+how:	$ /path/to/configure ?options? && make
+how:	$ make test
+how:	$ make install
+need:	Tcl, POSIX
+
+This package should build easily on any POSIX system.
+
+This package uses Spot o' Conf to configure and build.
+
+By default, this package will be configured to build
+threaded for Tcl 8.6 (threaded) on OpenBSD.

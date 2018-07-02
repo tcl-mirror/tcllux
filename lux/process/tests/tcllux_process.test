@@ -1,0 +1,21 @@
+#
+# Test TclLuX_process
+#
+
+package require Tcl 8.5
+package require tcltest 2
+namespace import ::tcltest::test
+
+package require tcllux::process
+namespace import tcllux::lux
+
+
+test tcllux_process-0.0 {Free test pass for getting this far} -body {} -result {}
+
+
+# cleanup
+::tcltest::cleanupTests
+flush stdout
+return
+
+# EOF

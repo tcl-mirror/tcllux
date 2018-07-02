@@ -1,0 +1,21 @@
+#
+# Test TclLuX_chroot
+#
+
+package require Tcl 8.6
+package require tcltest 2
+namespace import ::tcltest::test
+
+package require tcllux::chroot
+namespace import tcllux::lux
+
+
+test tcllux_chroot-0.0 {Free test pass for getting this far} -body {} -result {}
+
+
+# cleanup
+::tcltest::cleanupTests
+flush stdout
+return
+
+# EOF
