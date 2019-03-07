@@ -21,6 +21,7 @@
 
 	[call [cmd {lux chan configure}] [arg channelId] [opt [arg name]] [opt [arg val]] [opt [arg ...]]]
 		Configures the [arg channelId].
+		Options are -closeonexec and -handle.
 		Returns an empty string when setting.
 
 	[call [cmd {lux chan sync}]]
@@ -38,6 +39,32 @@
 	[call [cmd {lux chan dup}] [arg channelId]]
 		Duplicates the [arg channelId] to a new channelId.
 		Returns the new channelId.
+
+	[call [cmd {lux chan lock}] [arg channelId] [opt [arg name]] [opt [arg val]] [opt [arg ...]]]
+		Locks a region of a file.
+		Options and their defaults: -shared true -start 0 -length 0 -origin start -blocking false.
+		This command accepts but ignores a -pidvar option.
+		Returns a boolean true if the locking was successful, false otherwise.
+
+	[call [cmd {lux chan unlock}] [arg channelId] [opt [arg name]] [opt [arg val]] [opt [arg ...]]]
+		Unlocks a region of a file.
+		Options and their defaults: -shared true -start 0 -length 0 -origin start -blocking false.
+		This command accepts but ignores a -pidvar option.
+		Returns a boolean true if the unlocking was successful, false otherwise.
+
+	[call [cmd {lux chan canlock}] [arg channelId] [opt [arg name]] [opt [arg val]] [opt [arg ...]]]
+		Checks if region of a file can be locked.
+		Options and their defaults: -shared true -start 0 -length 0 -origin start.
+		This command accepts but ignores a -blocking option.
+		This command accepts a -pidvar option: -pidvar varname.
+		If the region can't be locked and the -pidvar option is supplied,
+		the pid of the process holding the lock will be stored in
+		the variable specified by varname.
+		Returns a boolean true if the region can be locked, false otherwise.
+
+	[call [cmd {lux chan owner}] [arg channelId] [opt [arg owner]]]
+		Get or set the owner of a channelId.
+		Returns an empty string when setting.
 
 	[call [cmd {lux chan write}] [arg channelId] [arg data]]
 		Writes [arg data] to [arg channelId].

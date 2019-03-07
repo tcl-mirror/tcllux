@@ -127,7 +127,11 @@
 <li><a href="#3"><b class="cmd">lux chan fsync</b> <i class="arg">channelId</i></a></li>
 <li><a href="#4"><b class="cmd">lux chan fdatasync</b> <i class="arg">channelId</i></a></li>
 <li><a href="#5"><b class="cmd">lux chan dup</b> <i class="arg">channelId</i></a></li>
-<li><a href="#6"><b class="cmd">lux chan write</b> <i class="arg">channelId</i> <i class="arg">data</i></a></li>
+<li><a href="#6"><b class="cmd">lux chan lock</b> <i class="arg">channelId</i> <span class="opt">?<i class="arg">name</i>?</span> <span class="opt">?<i class="arg">val</i>?</span> <span class="opt">?<i class="arg">...</i>?</span></a></li>
+<li><a href="#7"><b class="cmd">lux chan unlock</b> <i class="arg">channelId</i> <span class="opt">?<i class="arg">name</i>?</span> <span class="opt">?<i class="arg">val</i>?</span> <span class="opt">?<i class="arg">...</i>?</span></a></li>
+<li><a href="#8"><b class="cmd">lux chan canlock</b> <i class="arg">channelId</i> <span class="opt">?<i class="arg">name</i>?</span> <span class="opt">?<i class="arg">val</i>?</span> <span class="opt">?<i class="arg">...</i>?</span></a></li>
+<li><a href="#9"><b class="cmd">lux chan owner</b> <i class="arg">channelId</i> <span class="opt">?<i class="arg">owner</i>?</span></a></li>
+<li><a href="#10"><b class="cmd">lux chan write</b> <i class="arg">channelId</i> <i class="arg">data</i></a></li>
 </ul>
 </div>
 </div>
@@ -140,6 +144,7 @@
 	
 <dt><a name="1"><b class="cmd">lux chan configure</b> <i class="arg">channelId</i> <span class="opt">?<i class="arg">name</i>?</span> <span class="opt">?<i class="arg">val</i>?</span> <span class="opt">?<i class="arg">...</i>?</span></a></dt>
 <dd><p>Configures the <i class="arg">channelId</i>.
+		Options are -closeonexec and -handle.
 		Returns an empty string when setting.</p></dd>
 <dt><a name="2"><b class="cmd">lux chan sync</b></a></dt>
 <dd><p>System sync.
@@ -153,7 +158,29 @@
 <dt><a name="5"><b class="cmd">lux chan dup</b> <i class="arg">channelId</i></a></dt>
 <dd><p>Duplicates the <i class="arg">channelId</i> to a new channelId.
 		Returns the new channelId.</p></dd>
-<dt><a name="6"><b class="cmd">lux chan write</b> <i class="arg">channelId</i> <i class="arg">data</i></a></dt>
+<dt><a name="6"><b class="cmd">lux chan lock</b> <i class="arg">channelId</i> <span class="opt">?<i class="arg">name</i>?</span> <span class="opt">?<i class="arg">val</i>?</span> <span class="opt">?<i class="arg">...</i>?</span></a></dt>
+<dd><p>Locks a region of a file.
+		Options and their defaults: -shared true -start 0 -length 0 -origin start -blocking false.
+		This command accepts but ignores a -pidvar option.
+		Returns a boolean true if the locking was successful, false otherwise.</p></dd>
+<dt><a name="7"><b class="cmd">lux chan unlock</b> <i class="arg">channelId</i> <span class="opt">?<i class="arg">name</i>?</span> <span class="opt">?<i class="arg">val</i>?</span> <span class="opt">?<i class="arg">...</i>?</span></a></dt>
+<dd><p>Unlocks a region of a file.
+		Options and their defaults: -shared true -start 0 -length 0 -origin start -blocking false.
+		This command accepts but ignores a -pidvar option.
+		Returns a boolean true if the unlocking was successful, false otherwise.</p></dd>
+<dt><a name="8"><b class="cmd">lux chan canlock</b> <i class="arg">channelId</i> <span class="opt">?<i class="arg">name</i>?</span> <span class="opt">?<i class="arg">val</i>?</span> <span class="opt">?<i class="arg">...</i>?</span></a></dt>
+<dd><p>Checks if region of a file can be locked.
+		Options and their defaults: -shared true -start 0 -length 0 -origin start.
+		This command accepts but ignores a -blocking option.
+		This command accepts a -pidvar option: -pidvar varname.
+		If the region can't be locked and the -pidvar option is supplied,
+		the pid of the process holding the lock will be stored in
+		the variable specified by varname.
+		Returns a boolean true if the region can be locked, false otherwise.</p></dd>
+<dt><a name="9"><b class="cmd">lux chan owner</b> <i class="arg">channelId</i> <span class="opt">?<i class="arg">owner</i>?</span></a></dt>
+<dd><p>Get or set the owner of a channelId.
+		Returns an empty string when setting.</p></dd>
+<dt><a name="10"><b class="cmd">lux chan write</b> <i class="arg">channelId</i> <i class="arg">data</i></a></dt>
 <dd><p>Writes <i class="arg">data</i> to <i class="arg">channelId</i>.
 		Returns the number of bytes written to <i class="arg">channelId</i>.</p></dd>
 </dl>

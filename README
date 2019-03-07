@@ -2,12 +2,11 @@ what:	TclLuX - Tcl with the luxury of UNIX
 where:	https://chiselapp.com/user/stwo/repository/tcllux
 who:	Stuart Cassoff <stwo@users.sourceforge.net>
 why:	UNIX
-when:	Summer 2018
+when:	Winter 2019 (0.2), Summer 2018 (0.1)
 how:	$ /path/to/configure ?options? && make
 how:	$ make test
 how:	$ make install
 need:	Tcl, POSIX
-ver:	0.1
 
 
 TclLuX is a collection of packages,

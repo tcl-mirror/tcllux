@@ -1,8 +1,8 @@
-what:	Tclrusage 0.1
-where:
+what:	TclLuX Chan
+where:	https://chiselapp.com/user/stwo/repository/tcllux
 who:	Stuart Cassoff <stwo@users.sourceforge.net>
-why:	Tcl rusage command
-when:	Spring 2017
+why:	Channel functionality
+when:	Winter 2019 (0.2), Summer 2018 (0.1)
 how:	$ /path/to/configure ?options? && make
 how:	$ make test
 how:	$ make install

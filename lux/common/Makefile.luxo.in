@@ -5,8 +5,8 @@ lux-dist: dist-spot
 	$(INSTALL_DATA_DIR) $(DIST_DIR)/ezt
 	DIR=ezt; \
 	list='README UNLICENSE \
-		ezt.h ezt_init.c ezt_funcs.c ezt_tj.h \
-		ezt_eagain_ewouldblock.h ezt_int2ptr_ptr2int.h'; \
+	      ezt.h ezt_init.c ezt_funcs.c ezt_tj.h \
+	      ezt_eagain_ewouldblock.h ezt_int2ptr_ptr2int.h'; \
 	for p in $$list; do \
 	    $(DIST_INSTALL_DATA) ${srcdir}/$$DIR/$$p $(DIST_DIR)/$$DIR/; \
 	done

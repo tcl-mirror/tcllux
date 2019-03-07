@@ -290,6 +290,14 @@ namespace import ::tcllux::lux
 .sp
 \fBlux chan dup\fR \fIchannelId\fR
 .sp
+\fBlux chan lock\fR \fIchannelId\fR ?\fIname\fR? ?\fIval\fR? ?\fI\&.\&.\&.\fR?
+.sp
+\fBlux chan unlock\fR \fIchannelId\fR ?\fIname\fR? ?\fIval\fR? ?\fI\&.\&.\&.\fR?
+.sp
+\fBlux chan canlock\fR \fIchannelId\fR ?\fIname\fR? ?\fIval\fR? ?\fI\&.\&.\&.\fR?
+.sp
+\fBlux chan owner\fR \fIchannelId\fR ?\fIowner\fR?
+.sp
 \fBlux chan write\fR \fIchannelId\fR \fIdata\fR
 .sp
 .BE
@@ -300,6 +308,7 @@ chan functionality\&.
 .TP
 \fBlux chan configure\fR \fIchannelId\fR ?\fIname\fR? ?\fIval\fR? ?\fI\&.\&.\&.\fR?
 Configures the \fIchannelId\fR\&.
+Options are -closeonexec and -handle\&.
 Returns an empty string when setting\&.
 .TP
 \fBlux chan sync\fR
@@ -317,6 +326,32 @@ Returns an empty string\&.
 \fBlux chan dup\fR \fIchannelId\fR
 Duplicates the \fIchannelId\fR to a new channelId\&.
 Returns the new channelId\&.
+.TP
+\fBlux chan lock\fR \fIchannelId\fR ?\fIname\fR? ?\fIval\fR? ?\fI\&.\&.\&.\fR?
+Locks a region of a file\&.
+Options and their defaults: -shared true -start 0 -length 0 -origin start -blocking false\&.
+This command accepts but ignores a -pidvar option\&.
+Returns a boolean true if the locking was successful, false otherwise\&.
+.TP
+\fBlux chan unlock\fR \fIchannelId\fR ?\fIname\fR? ?\fIval\fR? ?\fI\&.\&.\&.\fR?
+Unlocks a region of a file\&.
+Options and their defaults: -shared true -start 0 -length 0 -origin start -blocking false\&.
+This command accepts but ignores a -pidvar option\&.
+Returns a boolean true if the unlocking was successful, false otherwise\&.
+.TP
+\fBlux chan canlock\fR \fIchannelId\fR ?\fIname\fR? ?\fIval\fR? ?\fI\&.\&.\&.\fR?
+Checks if region of a file can be locked\&.
+Options and their defaults: -shared true -start 0 -length 0 -origin start\&.
+This command accepts but ignores a -blocking option\&.
+This command accepts a -pidvar option: -pidvar varname\&.
+If the region can't be locked and the -pidvar option is supplied,
+the pid of the process holding the lock will be stored in
+the variable specified by varname\&.
+Returns a boolean true if the region can be locked, false otherwise\&.
+.TP
+\fBlux chan owner\fR \fIchannelId\fR ?\fIowner\fR?
+Get or set the owner of a channelId\&.
+Returns an empty string when setting\&.
 .TP
 \fBlux chan write\fR \fIchannelId\fR \fIdata\fR
 Writes \fIdata\fR to \fIchannelId\fR\&.
