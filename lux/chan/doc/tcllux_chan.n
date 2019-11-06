@@ -1,8 +1,8 @@
 '\"
 '\" Generated from file 'tcllux_chan\&.man' by tcllib/doctools with format 'nroff'
-'\" Copyright (c) 2018 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
+'\" Copyright (c) 2019 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
 '\"
-.TH "tcllux::chan" n 1\&.0 tcllux_chan "tcllux::chan"
+.TH "tcllux::chan" n 0\&.5 tcllux_chan "tcllux::chan"
 .\" The -*- nroff -*- definitions below are for supplemental macros used
 .\" in Tcl/Tk manual entries.
 .\"
@@ -276,7 +276,7 @@ tcllux::chan \- TclLux chan
 .SH SYNOPSIS
 package require \fBTcl  8\&.6\fR
 .sp
-package require \fBtcllux::chan  ?1\&.0?\fR
+package require \fBtcllux::chan  ?0\&.5?\fR
 .sp
 namespace import ::tcllux::lux
 .sp
@@ -365,6 +365,6 @@ chan, unix
 UNIX
 .SH COPYRIGHT
 .nf
-Copyright (c) 2018 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
+Copyright (c) 2019 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
 
 .fi

@@ -1,8 +1,8 @@
 '\"
 '\" Generated from file 'tcllux_process\&.man' by tcllib/doctools with format 'nroff'
-'\" Copyright (c) 2018 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
+'\" Copyright (c) 2019 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
 '\"
-.TH "tcllux::process" n 1\&.0 tcllux_process "tcllux::process"
+.TH "tcllux::process" n 0\&.5 tcllux_process "tcllux::process"
 .\" The -*- nroff -*- definitions below are for supplemental macros used
 .\" in Tcl/Tk manual entries.
 .\"
@@ -276,15 +276,13 @@ tcllux::process \- TclLux process
 .SH SYNOPSIS
 package require \fBTcl  8\&.6\fR
 .sp
-package require \fBtcllux::process  ?1\&.0?\fR
+package require \fBtcllux::process  ?0\&.5?\fR
 .sp
 namespace import ::tcllux::lux
 .sp
 \fBlux process ids\fR
 .sp
 \fBlux process gid\fR
-.sp
-\fBlux process qids\fR
 .sp
 \fBlux process fork\fR
 .sp
@@ -302,8 +300,6 @@ process functionality\&.
 .TP
 \fBlux process gid\fR
 .TP
-\fBlux process qids\fR
-.TP
 \fBlux process fork\fR
 .TP
 \fBlux process exec\fR
@@ -318,6 +314,6 @@ process, unix
 UNIX
 .SH COPYRIGHT
 .nf
-Copyright (c) 2018 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
+Copyright (c) 2019 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
 
 .fi

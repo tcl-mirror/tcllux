@@ -1,10 +1,10 @@
-[manpage_begin itimer n 1.0]
+[manpage_begin itimer n 0.5]
 [require   Tcl 8.6]
-[require   tcllux::itimer [opt 1.0]]
+[require   tcllux::itimer [opt 0.5]]
 [moddesc   {lux itimer}]
 [titledesc {TclLux itimer}]
 [category  {UNIX}]
-[copyright {2018 Stuart Cassoff <stwo@users.sourceforge.net>}]
+[copyright {2019 Stuart Cassoff <stwo@users.sourceforge.net>}]
 [keywords  unix itimer]
 [see_also  itimer(3)]
 

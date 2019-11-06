@@ -1,10 +1,10 @@
-[manpage_begin tcllux::process n 1.0]
+[manpage_begin tcllux::process n 0.5]
 [require   Tcl 8.6]
-[require   tcllux::process [opt 1.0]]
+[require   tcllux::process [opt 0.5]]
 [moddesc   {tcllux::process}]
 [titledesc {TclLux process}]
 [category  {UNIX}]
-[copyright {2018 Stuart Cassoff <stwo@users.sourceforge.net>}]
+[copyright {2019 Stuart Cassoff <stwo@users.sourceforge.net>}]
 [keywords  unix process]
 [see_also  process(3)]
 
@@ -21,7 +21,6 @@
 
 	[call [cmd {lux process ids}]]
 	[call [cmd {lux process gid}]]
-	[call [cmd {lux process qids}]]
 	[call [cmd {lux process fork}]]
 	[call [cmd {lux process exec}]]
 	[call [cmd {lux process priority}]]

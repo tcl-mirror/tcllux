@@ -7,8 +7,9 @@ package require Tcl 8.5
 if {[package provide tcltest] eq ""} {
 	package require tcltest 2
 	tcltest::configure {*}$::argv -testdir [file dir [info script]]
-	namespace import ::tcltest::test
 }
+namespace import ::tcltest::test
+namespace import ::tcltest::testConstraint
 
 if {[llength [info commands ::tcltest::setup]] == 1} {
 	namespace import ::tcltest::setup
@@ -62,9 +63,16 @@ test tcllux_rusage-1.3 {lux rusage ensemble exports} -body {
 	namespace eval tcllux::lux { namespace export }
 } -result rusage
 
-test tcllux_rusage-1.4 {lux rusage ensemble command args} -body {
+testConstraint has_rusage_thread [string match *thread [apply {{} {catch {tcllux::lux rusage check} res; set res}}]]
+testConstraint no_rusage_thread [expr {![testConstraint has_rusage_thread]}]
+
+test tcllux_rusage-1.4.1 {lux rusage ensemble command args} -constraints has_rusage_thread -body {
 	tcllux::lux rusage me
 } -returnCodes {error} -result {bad who "me": must be self, children or thread}
+
+test tcllux_rusage-1.4.2 {lux rusage ensemble command args} -constraints no_rusage_thread -body {
+	tcllux::lux rusage me
+} -returnCodes {error} -result {bad who "me": must be self or children}
 
 
 test tcllux_rusage-1.5 {lux rusage keys: default (self)} -body {
@@ -82,7 +90,7 @@ test tcllux_rusage-1.7 {lux rusage keys: children} -body {
 } -result {rusage utime stime maxrss ixrss idrss isrss minflt majflt nswap inblock oublock msgsnd msgrcv nsignals nivcsw}
 
 
-test tcllux_rusage-1.8 {lux rusage keys: thread} -body {
+test tcllux_rusage-1.8 {lux rusage keys: thread} -constraints has_rusage_thread -body {
 	dict keys [tcllux::lux rusage thread]
 } -result {rusage utime stime maxrss ixrss idrss isrss minflt majflt nswap inblock oublock msgsnd msgrcv nsignals nivcsw}
 
@@ -102,7 +110,7 @@ test tcllux_rusage-1.11 {lux rusage values: rusage key: children} -body {
 } -result children
 
 
-test tcllux_rusage-1.12 {lux rusage values: rusage key: thread} -body {
+test tcllux_rusage-1.12 {lux rusage values: rusage key: thread} -constraints has_rusage_thread -body {
 	dict get [tcllux::lux rusage thread] rusage
 } -result thread
 

@@ -1,0 +1,87 @@
+
+B = @B@
+
+pkgs: pkgs-build
+
+pkgs-reconfigure:
+	@for p in $(PKGS); do \
+	    (cd $${p}$(B) && make reconfigure); \
+	done
+
+pkgs-configure:
+	@for p in $(PKGS); do \
+	    if test -d $${p}$(B); then \
+		(cd $${p}$(B) && make configure); \
+	    else \
+		$(INSTALL_DATA_DIR) $${p}$(B); \
+		(cd $${p}$(B) && ../${srcdir}/${PKGS_DIR}/$$p/configure ${SPOTO_ARGS}); \
+	    fi; \
+	done
+
+pkgs-build: pkgs-configure
+	@for p in $(PKGS); do \
+	    (cd $${p}$(B) && make); \
+	done
+
+pkgs-clean:
+	@for p in $(PKGS); do \
+	    if ! test -f $${p}$(B)/Makefile; then continue; fi; \
+	    (cd $${p}$(B) && make clean); \
+	done
+
+pkgs-distclean:
+	@for p in $(PKGS); do \
+	    if test -f $${p}$(B)/Makefile; then \
+		(cd $${p}$(B) && make distclean); \
+	    fi; \
+	    if ! test -d $${p}$(B); then continue; fi; \
+	    rmdir $${p}$(B); \
+	done
+
+pkgs-test: all
+	@for p in $(PKGS); do \
+	    (cd $${p}$(B) && make test); \
+	done
+
+pkgs-install: all
+	@ \
+	if test X"$(DESTDIR)" != X"" && ! expr X"$(DESTDIR)" : ^X'/..*' > /dev/null; then \
+	    $(E) 'DESTDIR must be an absolute path'; \
+	    exit 1; \
+	fi; \
+	for p in $(PKGS); do \
+	    (cd $${p}$(B) && make install DESTDIR="$(DESTDIR)"); \
+	done
+
+pkgs-dist: pkgs-configure
+	$(DIST_INSTALL_DATA) ${srcdir}/Makefile.pkgs.in $(DIST_DIR)/
+	$(INSTALL_DATA_DIR) $(DIST_DIR)/${PKGS_DIR}
+	pkgs='' && \
+	for p in $(PKGS); do \
+	    if expr $$p : '^..*-.*$$' > /dev/null; then \
+		pkg=$$p; \
+	    else \
+		pkg=$$(cd $${p}$(B) && make print-dist-name); \
+	    fi; \
+	    pkgs="$$pkgs $$pkg"; \
+	    (cd $${p}$(B) && make dist) \
+	    && tar xzf $(DIST_ROOT)/$$pkg.tar.gz -C $(DIST_DIR)/${PKGS_DIR} \
+	    && mv $(DIST_DIR)/${PKGS_DIR}/$$pkg $(DIST_DIR)/${PKGS_DIR}/$$p; \
+	done \
+	&& echo $$pkgs
+
+pkgs-result:
+	@for p in $(PKGS); do \
+	    if ! test -f $${p}$(B)/Makefile; then continue; fi; \
+	    (cd $${p}$(B) && make result); \
+	done
+
+pkgs-thatch:
+	@for p in $(PKGS); do \
+	    if ! test -f $${p}$(B)/Makefile; then continue; fi; \
+	    (cd $${p}$(B) && make thatch); \
+	done
+
+.PHONY: pkgs pkgs-reconfigure pkgs-configure pkgs-build pkgs-clean pkgs-distclean
+.PHONY: pkgs-test pkgs-install pkgs-dist
+.PHONY: pkgs-result pkgs-thatch

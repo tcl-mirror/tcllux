@@ -1,8 +1,8 @@
 '\"
 '\" Generated from file 'tcllux_user\&.man' by tcllib/doctools with format 'nroff'
-'\" Copyright (c) 2018 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
+'\" Copyright (c) 2019 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
 '\"
-.TH "tcllux::user" n 1\&.0 tcllux_user "tcllux::user"
+.TH "tcllux::user" n 0\&.5 tcllux_user "tcllux::user"
 .\" The -*- nroff -*- definitions below are for supplemental macros used
 .\" in Tcl/Tk manual entries.
 .\"
@@ -276,7 +276,7 @@ tcllux::user \- TclLux User
 .SH SYNOPSIS
 package require \fBTcl  8\&.6\fR
 .sp
-package require \fBtcllux::user  ?1\&.0?\fR
+package require \fBtcllux::user  ?0\&.5?\fR
 .sp
 namespace import ::tcllux::lux
 .sp
@@ -291,7 +291,7 @@ user information\&.
 .SH COMMANDS
 .TP
 \fBlux user ids\fR
-Returns a dict\&. Keys: ruid euid euid\&.
+Returns a list of key-value pairs\&. Keys: ruid euid suid\&.
 .TP
 \fBlux user login\fR
 Returns current user login name\&.
@@ -304,6 +304,6 @@ unix, user
 UNIX
 .SH COPYRIGHT
 .nf
-Copyright (c) 2018 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
+Copyright (c) 2019 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
 
 .fi

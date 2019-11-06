@@ -16,7 +16,7 @@
 
 
 /*
- * Tcl extension that provides something.
+ * Tcl extension that provides signal facilities.
  */
 
 
@@ -25,8 +25,10 @@ extern "C" {
 #endif
 
 
+#include <stdint.h>	/* uint64_t */
 #include <signal.h>	/* sigaction, kill */
 #include <unistd.h>	/* write */
+#include <string.h>	/* strsignal */
 #include <time.h>	/* clock_gettime */
 #include <fcntl.h>	/* fcntl */
 #include <errno.h>	/* errno */
@@ -57,161 +59,139 @@ static const Ezt_Cmd Ezt_Cmds[] = {
 
 /***/
 
-static int           sigfds[NSIG] = {-1};
-static Tcl_Channel sigchans[NSIG] = {NULL};
+#include "tcllux_signal_signals.c"
 
 /***/
-
-static void
-Tcllux_signal_SigHandler_Signal (int sig) {
-	int save_errno = errno;
-	int fd = sigfds[sig];
-	int flags;
-#if 0
-	long buf[2] = {0};
-	struct timespec ts;
-	if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
-		buf[0] = ts.tv_sec;
-		buf[1] = ts.tv_nsec;
-	}
-#else
-	char buf[1] = {(char) sig};
-#endif
-	flags = fcntl(fd, F_GETFL);
-	if (flags & O_NONBLOCK) {
-		write(fd, buf, sizeof buf);
-	} else {
-		fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-		write(fd, buf, sizeof buf);
-		fcntl(fd, F_SETFL, flags);
-	}
-	errno = save_errno;
-}
-
-static void
-Tcllux_signal_SigHandler_Timestamp (int sig) {
-	int save_errno = errno;
-	int fd = sigfds[sig];
-	int flags;
-#if 1
-	long buf[2] = {0};
-	struct timespec ts;
-	if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
-		buf[0] = ts.tv_sec;
-		buf[1] = ts.tv_nsec;
-	}
-#else
-	char buf[1] = {(char) sig};
-#endif
-	flags = fcntl(fd, F_GETFL);
-	if (flags & O_NONBLOCK) {
-		write(fd, buf, sizeof buf);
-	} else {
-		fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-		write(fd, buf, sizeof buf);
-		fcntl(fd, F_SETFL, flags);
-	}
-	errno = save_errno;
-}
 
 /*
  * Resets signal and fd/chan array elements when channel closed.
  */
 static void
 Tcllux_signal_ChannelCloseHandler (ClientData clientData) {
-	int sig = (int) clientData;
-	struct sigaction nsa = {{0}, 0, 0};
+	int idx = PTR2INT(clientData);
+	struct sigaction nsa;
 	nsa.sa_handler = SIG_DFL;
-	sigaction(sig, &nsa, NULL);
-	sigfds[sig] = -1;
-	sigchans[sig] = NULL;
+	nsa.sa_flags = 0;
+	sigemptyset(&nsa.sa_mask);
+	sigaction(Tcllux_signal_Signals[idx].number, &nsa, NULL);
+	sigfds[idx] = -1;
+	sigchans[idx] = NULL;
 }
 
 /***/
 
 static int
-Tcllux_signal_GetSigNum (Tcl_Interp *interp, Tcl_Obj *signameornum, int *signum) {
+Tcllux_signal_GetSigIdx (Tcl_Interp *interp, Tcl_Obj *signameornum, int *idxPtr) {
+	int idx;
 	int num;
-	if (Tcl_GetIntFromObj(NULL, signameornum, &num) != TCL_OK) {
-		const char *nameStr = Tcl_GetString(signameornum);
-		if (	   (nameStr[0] == 'S' || nameStr[0] == 's')
-			&& (nameStr[1] == 'I' || nameStr[1] == 'i')
-			&& (nameStr[2] == 'G' || nameStr[2] == 'g')
-		) {
-			nameStr += 3;
+	const char *nameStr;
+	if (Tcl_GetIntFromObj(NULL, signameornum, &num) == TCL_OK) {
+		if (num == 0) {
+			*idxPtr = -1;
+			return TCL_OK;
 		}
-		for (num = 1; num < NSIG; num++) {
-			if (Tcl_StringCaseMatch(nameStr, sys_signame[num], TCL_MATCH_NOCASE)) {
-				break;
+		for (idx = 0; idx < COMBIEN(Tcllux_signal_Signals); idx++) {
+			if (Tcllux_signal_Signals[idx].name == NULL) { continue; }
+			if (num == Tcllux_signal_Signals[idx].number) {
+				*idxPtr = idx;
+				return TCL_OK;
 			}
 		}
-		if (num == NSIG) {
-			return Ezt_ReportError(interp, "\"", nameStr, "\" isn't a known signal name", (char*) NULL);
+		return Ezt_ReportError(interp, "\"", Tcl_GetString(signameornum), "\" isn't a known signal", (char*) NULL);
+	}
+	nameStr = Tcl_GetString(signameornum);
+	if (	   (nameStr[0] == 'S' || nameStr[0] == 's')
+		&& (nameStr[1] == 'I' || nameStr[1] == 'i')
+		&& (nameStr[2] == 'G' || nameStr[2] == 'g')
+	) {
+		nameStr += 3;
+	}
+	for (idx = 0; idx < COMBIEN(Tcllux_signal_Signals); idx++) {
+		if (Tcllux_signal_Signals[idx].name == NULL) { continue; }
+		if (Tcl_StringCaseMatch(nameStr, Tcllux_signal_Signals[idx].name, TCL_MATCH_NOCASE)) {
+			*idxPtr = idx;
+			return TCL_OK;
 		}
 	}
-	*signum = num;
-	return TCL_OK;
+	return Ezt_ReportError(interp, "\"", Tcl_GetString(signameornum), "\" isn't a known signal", (char*) NULL);
 }
 
 /*
  * Returned obj has refcount 1.
  */
 static Tcl_Obj *
-Tcllux_signal_GetSigactionInfo (int sig) {
-	Tcl_Obj *d;
+Tcllux_signal_GetSigactionInfo (int idx) {
+	Tcl_Obj *l;
+	Tcl_Obj *ml;
 	struct sigaction osa;
+	int i;
 
-	sigaction(sig, NULL, &osa);
+	sigaction(Tcllux_signal_Signals[idx].number, NULL, &osa);
 
-	d = Tcl_NewDictObj();
-	Tcl_IncrRefCount(d);
+	l = Tcl_NewListObj(0, NULL);
+	Tcl_IncrRefCount(l);
 
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("name",   -1), Tcl_NewStringObj(sys_signame[sig], -1));
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("number", -1), Tcl_NewIntObj(sig));
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("mask",   -1), Tcl_NewLongObj(osa.sa_mask));
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("flags",  -1), Tcl_NewLongObj(osa.sa_flags));
+	Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj("name", -1));
+	Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj(Tcllux_signal_Signals[idx].name, -1));
+	Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj("number", -1));
+	Tcl_ListObjAppendElement(NULL, l, Tcl_NewIntObj(Tcllux_signal_Signals[idx].number));
 
+	ml = Tcl_NewListObj(0, NULL);
+	Tcl_IncrRefCount(ml);
+	for (i = 0; i < COMBIEN(Tcllux_signal_Signals); i++) {
+		if (Tcllux_signal_Signals[i].name == NULL) { continue; }
+		if (!sigismember(&osa.sa_mask, Tcllux_signal_Signals[i].number)) { continue; }
+		Tcl_ListObjAppendElement(NULL, ml, Tcl_NewStringObj(Tcllux_signal_Signals[i].name, -1));
+	}	
+	Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj("mask", -1));
+	Tcl_ListObjAppendElement(NULL, l, ml);
+	Tcl_DecrRefCount(ml);
+
+	Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj("flags", -1));
+	Tcl_ListObjAppendElement(NULL, l, Tcl_NewLongObj(osa.sa_flags));
+
+	Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj("action", -1));
 	if (osa.sa_handler == SIG_DFL) {
-		Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("action", -1), Tcl_NewStringObj("default", -1));
+		Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj("default", -1));
 	} else if (osa.sa_handler == SIG_IGN) {
-		Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("action", -1), Tcl_NewStringObj("ignore", -1));
+		Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj("ignore", -1));
 	} else {
-		Tcl_Obj *o;
-		Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("action", -1), Tcl_NewStringObj(Tcl_GetChannelName(sigchans[sig]), -1));
-		if (osa.sa_handler == Tcllux_signal_SigHandler_Signal) {
-			o = Tcl_NewStringObj("signal", -1);
-		} else if (osa.sa_handler == Tcllux_signal_SigHandler_Timestamp) {
-			o = Tcl_NewStringObj("timestamp", -1);
+		Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj(Tcl_GetChannelName(sigchans[idx]), -1));
+		Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj("send", -1));
+		if (osa.sa_handler == Tcllux_signal_Signals[idx].sighs) {
+			Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj("signal", -1));
+		} else if (osa.sa_handler == Tcllux_signal_Signals[idx].sight) {
+			Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj("timestamp", -1));
 		} else {
-			o = Tcl_NewStringObj("?", -1);
+			Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj("?", -1));
 		}
-		Tcl_IncrRefCount(o);
-		Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("send",  -1), o);
-		Tcl_DecrRefCount(o);
 	}
-
-	return d;
+	return l;
 }
 
 TCMD(Tcllux_signal_set_Cmd) {
 	const char *action;
-	int sig = 0; /*cw*/
+	int idx = 0; /*cw*/
 	Tcl_Channel chan = NULL;
 	int fd = -1;
 	int timestamp = 0;
-	struct sigaction nsa = {{0}, 0, 0};
+	struct sigaction nsa;
 
 	if (objc < 2 || objc > 4) {
 		return Ezt_WrongNumArgs(interp, 1, objv, "sig ?action? ?send?");
 	}
 
-	if (Tcllux_signal_GetSigNum(interp, objv[1], &sig) != TCL_OK) {
+	if (Tcllux_signal_GetSigIdx(interp, objv[1], &idx) != TCL_OK) {
 		return TCL_ERROR;
+	}
+
+	if (idx == -1) {
+		return TCL_OK;
 	}
 
 	if (objc == 2) {
 		Tcl_Obj *o;
-		o = Tcllux_signal_GetSigactionInfo(sig);
+		o = Tcllux_signal_GetSigactionInfo(idx);
 		Tcl_SetObjResult(interp, o);
 		Tcl_DecrRefCount(o);
 		return TCL_OK;
@@ -242,27 +222,30 @@ TCMD(Tcllux_signal_set_Cmd) {
 		if (Tcl_GetChannelHandle(chan, TCL_WRITABLE, (ClientData) &fd) != TCL_OK) {
 			return TCL_ERROR;
 		}
-		nsa.sa_handler = timestamp ? Tcllux_signal_SigHandler_Timestamp : Tcllux_signal_SigHandler_Signal;
+		nsa.sa_handler = timestamp ? Tcllux_signal_Signals[idx].sight : Tcllux_signal_Signals[idx].sighs;
 	}
 
-	sigfds[sig] = fd;
+	nsa.sa_flags = 0;
+	sigemptyset(&nsa.sa_mask);
 
-	if (sigchans[sig] != NULL) {
-		Tcl_DeleteCloseHandler(sigchans[sig], Tcllux_signal_ChannelCloseHandler, (ClientData) INT2PTR(sig));
-		sigchans[sig] = NULL;
+	sigfds[idx] = fd;
+
+	if (sigchans[idx] != NULL) {
+		Tcl_DeleteCloseHandler(sigchans[idx], Tcllux_signal_ChannelCloseHandler, (ClientData) INT2PTR(idx));
+		sigchans[idx] = NULL;
 	}
 
 	if (chan != NULL) {
-		Tcl_CreateCloseHandler(chan, Tcllux_signal_ChannelCloseHandler, (ClientData) INT2PTR(sig));
-		sigchans[sig] = chan;
+		Tcl_CreateCloseHandler(chan, Tcllux_signal_ChannelCloseHandler, (ClientData) INT2PTR(idx));
+		sigchans[idx] = chan;
 	}
 
-	if (sigaction(sig, &nsa, NULL) != 0) {
-		if (sigchans[sig] != NULL) {
-			Tcl_DeleteCloseHandler(chan, Tcllux_signal_ChannelCloseHandler, (ClientData) INT2PTR(sig));
-			sigchans[sig] = NULL;
+	if (sigaction(Tcllux_signal_Signals[idx].number, &nsa, NULL) != 0) {
+		if (sigchans[idx] != NULL) {
+			Tcl_DeleteCloseHandler(chan, Tcllux_signal_ChannelCloseHandler, (ClientData) INT2PTR(idx));
+			sigchans[idx] = NULL;
 		}
-		sigfds[sig] = -1;
+		sigfds[idx] = -1;
 		return rperr("Couldn't set signal: ");
 	}
 
@@ -271,42 +254,43 @@ TCMD(Tcllux_signal_set_Cmd) {
 
 TCMD(Tcllux_signal_send_Cmd) {
 	pid_t pid;
-	int sig;
+	int idx;
 	if (objc != 3) {
 		return Ezt_WrongNumArgs(interp, 1, objv, "sig pid");
 	}
 	if (Tcl_GetIntFromObj(interp, objv[2], &pid) != TCL_OK) {
 		return TCL_ERROR;
 	}
-	if (Tcllux_signal_GetSigNum(interp, objv[1], &sig) != TCL_OK) {
+	if (Tcllux_signal_GetSigIdx(interp, objv[1], &idx) != TCL_OK) {
 		return TCL_ERROR;
 	}
-	if (kill(pid, sig) != 0) {
+	if (kill(pid, idx == -1 ? 0 : Tcllux_signal_Signals[idx].number) != 0) {
 		return rperr("Couldn't send signal: ");
 	}
 	return TCL_OK;
 }
 
 TCMD(Tcllux_signal_signals_Cmd) {
-	Tcl_Obj *o;
-	int i;
-
+	Tcl_Obj *r;
+	Tcl_Obj *l;
+	int idx;
 	if (objc != 1) {
 		return Ezt_WrongNumArgs(interp, 1, objv, NULL);
 	}
-
-	o = Tcl_NewDictObj();
-	Tcl_IncrRefCount(o);
-
-	Tcl_DictObjPut(NULL, o, Tcl_NewStringObj("", -1), Tcl_NewStringObj("", -1));
-
-	for (i = 1; i < NSIG; i++) {
-		Tcl_DictObjPut(NULL, o, Tcl_NewStringObj(sys_signame[i], -1), Tcl_NewStringObj(sys_siglist[i], -1));
+	r = Tcl_NewListObj(0, NULL);
+	Tcl_IncrRefCount(r);
+	for (idx = 0; idx < COMBIEN(Tcllux_signal_Signals); idx++) {
+		if (Tcllux_signal_Signals[idx].name == NULL) { continue; }
+		l = Tcl_NewListObj(0, NULL);
+		Tcl_IncrRefCount(l);
+		Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj(Tcllux_signal_Signals[idx].name, -1));
+		Tcl_ListObjAppendElement(NULL, l, Tcl_NewIntObj(Tcllux_signal_Signals[idx].number));
+		Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj(strsignal(Tcllux_signal_Signals[idx].number), -1));
+		Tcl_ListObjAppendElement(NULL, r, l);
+		Tcl_DecrRefCount(l);
 	}
-
-	Tcl_SetObjResult(interp, o);
-	Tcl_DecrRefCount(o);
-
+	Tcl_SetObjResult(interp, r);
+	Tcl_DecrRefCount(r);
 	return TCL_OK;
 }
 

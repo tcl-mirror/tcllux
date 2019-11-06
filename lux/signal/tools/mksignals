@@ -1,0 +1,137 @@
+#! /bin/sh
+
+e='printf %s\n'
+
+sigs="HUP INT QUIT ILL TRAP ABRT EMT FPE KILL \
+BUS SEGV SYS PIPE ALRM TERM URG STOP TSTP CONT \
+CHLD TTIN TTOU IO XCPU XFSZ VTALRM PROF WINCH \
+INFO USR1 USR2"
+
+
+cat <<'ENDBLOB'
+/* tcllux_signal_signals.c: start */
+ENDBLOB
+
+
+$e ''
+
+
+cat <<'ENDBLOB'
+#define LUXSIGHNBW \
+	flags = fcntl(sigfds[N], F_GETFL); \
+	if (flags & O_NONBLOCK) { \
+		write(sigfds[N], buf, sizeof buf); \
+	} else { \
+		fcntl(sigfds[N], F_SETFL, flags | O_NONBLOCK); \
+		write(sigfds[N], buf, sizeof buf); \
+		fcntl(sigfds[N], F_SETFL, flags); \
+	}
+#define LUXSIGHNONE { NULL, -1, NULL, NULL }
+#define LUXSIGHS(N) Tcllux_signal_SigHandler_Signal_##N
+#define LUXSIGHT(N) Tcllux_signal_SigHandler_Timestamp_##N
+#define LUXSIGHSD(N) static void Tcllux_signal_SigHandler_Signal_##N (int sig)
+#define LUXSIGHSC(N) static void Tcllux_signal_SigHandler_Signal_##N (int sig) { \
+	int save_errno = errno; \
+	char buf[1] = {(char) sig}; \
+	write(sigfds[N], buf, sizeof buf); \
+	errno = save_errno; \
+}
+#define LUXSIGHSNBC(N) static void Tcllux_signal_SigHandler_Signal_NB_##N (int sig) { \
+	int save_errno = errno; \
+	int flags; \
+	char buf[1] = {(char) sig}; \
+	LUXSIGHNBW \
+	errno = save_errno; \
+}
+#define LUXSIGHTD(N) static void Tcllux_signal_SigHandler_Timestamp_##N (int sig)
+#define LUXSIGHTC(N) static void Tcllux_signal_SigHandler_Timestamp_##N (int sig) { \
+	int save_errno = errno; \
+	uint64_t buf[2] = {0}; \
+	struct timespec ts; \
+	if (clock_gettime(CLOCK_REALTIME, &ts) == 0) { \
+		buf[0] = ts.tv_sec; \
+		buf[1] = ts.tv_nsec; \
+	} \
+	write(sigfds[N], buf, sizeof buf); \
+	errno = save_errno; \
+}
+#define LUXSIGHTNBC(N) static void Tcllux_signal_SigHandler_Timestamp_NB_##N (int sig) { \
+	int save_errno = errno; \
+	int flags; \
+	uint64_t buf[2] = {0}; \
+	struct timespec ts; \
+	if (clock_gettime(CLOCK_REALTIME, &ts) == 0) { \
+		buf[0] = ts.tv_sec; \
+		buf[1] = ts.tv_nsec; \
+	} \
+	LUXSIGHNBW \
+	errno = save_errno; \
+}
+ENDBLOB
+
+$e ''
+
+c=0;
+for s in $sigs; do 
+cat <<COW
+#ifdef SIG$s
+LUXSIGHSD($c);
+LUXSIGHTD($c);
+#endif
+COW
+c=`expr $c + 1`
+done
+
+$e ''
+
+cat <<'ENDBLOB'
+static struct Tcllux_signal_Signal {
+	const char *name;
+	int number;
+	void (*sighs) (int);
+	void (*sight) (int);
+} Tcllux_signal_Signals[] = {
+ENDBLOB
+
+c=0;
+for s in $sigs; do 
+cat <<COW
+#ifdef SIG$s
+	{ "$s", SIG$s, LUXSIGHS($c), LUXSIGHT($c) },
+#else
+	LUXSIGHNONE,
+#endif
+COW
+c=`expr $c + 1`
+done
+
+$e '};'
+
+$e ''
+
+cat <<'ENDBLOB'
+static int           sigfds[COMBIEN(Tcllux_signal_Signals)] = {-1};
+static Tcl_Channel sigchans[COMBIEN(Tcllux_signal_Signals)] = {NULL};
+ENDBLOB
+
+$e ''
+
+c=0;
+for s in $sigs; do 
+cat <<COW
+#ifdef SIG$s
+LUXSIGHSC($c);
+LUXSIGHTC($c);
+#endif
+COW
+c=`expr $c + 1`
+done
+
+$e ''
+
+cat <<'ENDBLOB'
+/* tcllux_signal_signals.c: end */
+ENDBLOB
+
+
+# EOF

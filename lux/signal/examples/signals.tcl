@@ -1,4 +1,3 @@
-
 #! /bin/sh
 # \
 exec tclsh${TCL} "$0" "$@"
@@ -11,6 +10,7 @@ exec tclsh${TCL} "$0" "$@"
 #
 # Stuart Cassoff
 # Spring 2018
+# Summer 2019
 #
 
 [namespace eval ::TclLuX_Signal {
@@ -18,26 +18,29 @@ exec tclsh${TCL} "$0" "$@"
 package require tcllux::signal
 namespace import ::tcllux::lux
 
-proc print_signals {} {
-	variable signals
-	variable fmt
-	puts Signals:
-	puts [format $fmt Num Signal Descr]
-	set i -1; dict for {sig descr} $signals {
-		puts [format $fmt [incr i] $sig $descr]
+proc print_signal {sig} {
+	puts [format "%-6s %2s %s" {*}$sig]
+}
+
+proc dump_signal {sig} {
+	set ss [lux signal set [lindex $sig 0]]
+	if {[dict size $ss] == 6} {
+		puts [format "%s %-6s %s %2s %s %s %s %2x %s %-7s %s %s  %s" {*}$ss [lindex $sig 2]]
+	} else {
+		puts [format "%s %-6s %s %2s %s %s %s %2x %s %-7s  %s" {*}$ss [lindex $sig 2]]
 	}
 }
 
 proc sigmund {chan send} {
 	if {$send eq "timestamp"} {
-		binary scan [read $chan] ii s ns
-		puts [format {%s.%s} $s $ns]
+		binary scan [read $chan 16] mm s ns
+		puts $s.$ns
 	} elseif {$send eq "signal"} {
-		variable fmt
 		variable signals
-		binary scan [read $chan] c s
-		set sn [lindex [dict keys $signals] $s]
-		puts [format $fmt $s $sn [dict get $signals $sn]]
+		binary scan [read $chan 1] c s
+		if {[set i [lsearch -index 1 $signals $s]] != -1} {
+			print_signal [lindex $signals $i]
+		}
 	} else {
 		explode
 	}
@@ -46,14 +49,15 @@ proc sigmund {chan send} {
 proc go {} {
 	set sigs [dict create hup 1100 alrm 2200 usr1 4000 prof 5000]
 	variable done 0
-	variable fmt {%3s %-6s %s}
 	variable signals [lux signal signals]
-	print_signals
+	foreach sig $signals {
+		dump_signal $sig
+	}
 	lassign [chan pipe] r w
-	chan configure $r -blocking 0
-	chan configure $w -blocking 0
-	foreach send [list timestamp signal] {
-		fileevent $r readable [list [namespace current]::sigmund $r $send]
+	chan configure $r -translation binary -blocking 0
+	chan configure $w -translation binary -blocking 0
+	foreach send [list signal timestamp] {
+		chan event $r readable [list [namespace current]::sigmund $r $send]
 		set ai [after 8000 [list set [namespace current]::done 1]] ;#cheap
 		puts Trying\ with\ $send:\ [dict keys $sigs]
 		dict for {sig time} $sigs {

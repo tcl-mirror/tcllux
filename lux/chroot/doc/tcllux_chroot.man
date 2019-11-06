@@ -1,10 +1,10 @@
-[manpage_begin tcllux::chroot n 1.0]
+[manpage_begin tcllux::chroot n 0.5]
 [require   Tcl 8.6]
-[require   tcllux::chroot [opt 1.0]]
+[require   tcllux::chroot [opt 0.5]]
 [moddesc   {tcllux::chroot}]
 [titledesc {TclLux chroot}]
 [category  {UNIX}]
-[copyright {2018 Stuart Cassoff <stwo@users.sourceforge.net>}]
+[copyright {2019 Stuart Cassoff <stwo@users.sourceforge.net>}]
 [keywords  unix chroot]
 [see_also  chroot(2)]
 

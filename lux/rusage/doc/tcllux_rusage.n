@@ -1,8 +1,8 @@
 '\"
 '\" Generated from file 'tcllux_rusage\&.man' by tcllib/doctools with format 'nroff'
-'\" Copyright (c) 2018 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
+'\" Copyright (c) 2019 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
 '\"
-.TH "tcllux::rusage" n 1\&.0 tcllux_rusage "tcllux::rusage"
+.TH "tcllux::rusage" n 0\&.5 tcllux_rusage "tcllux::rusage"
 .\" The -*- nroff -*- definitions below are for supplemental macros used
 .\" in Tcl/Tk manual entries.
 .\"
@@ -276,7 +276,7 @@ tcllux::rusage \- TclLux rusage
 .SH SYNOPSIS
 package require \fBTcl  8\&.6\fR
 .sp
-package require \fBtcllux::rusage  ?1\&.0?\fR
+package require \fBtcllux::rusage  ?0\&.5?\fR
 .sp
 namespace import ::tcllux::lux
 .sp
@@ -300,6 +300,7 @@ Returns rusage information about the terminated children of the current process\
 .TP
 \fB\fBthread\fR\fR
 Returns rusage information about the current thread\&.
+Non-standard option; may not be available\&.
 .RE
 .PP
 .SH "SEE ALSO"
@@ -310,6 +311,6 @@ rusage, unix
 UNIX
 .SH COPYRIGHT
 .nf
-Copyright (c) 2018 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
+Copyright (c) 2019 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
 
 .fi

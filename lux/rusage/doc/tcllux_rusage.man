@@ -1,10 +1,10 @@
-[manpage_begin tcllux::rusage n 1.0]
+[manpage_begin tcllux::rusage n 0.5]
 [require   Tcl 8.6]
-[require   tcllux::rusage [opt 1.0]]
+[require   tcllux::rusage [opt 0.5]]
 [moddesc   {tcllux::rusage}]
 [titledesc {TclLux rusage}]
 [category  {UNIX}]
-[copyright {2018 Stuart Cassoff <stwo@users.sourceforge.net>}]
+[copyright {2019 Stuart Cassoff <stwo@users.sourceforge.net>}]
 [keywords  unix rusage]
 [see_also  getrusage(2)]
 
@@ -32,6 +32,7 @@
 
 		[opt_def [option thread]]
 			Returns rusage information about the current thread.
+			Non-standard option; may not be available.
 
 	[list_end]
 

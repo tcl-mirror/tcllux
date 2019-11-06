@@ -45,7 +45,6 @@ TCMD(Tcllux_process_gid_Cmd);
 TCMD(Tcllux_process_fork_Cmd);
 TCMD(Tcllux_process_exec_Cmd);
 TCMD(Tcllux_process_priority_Cmd);
-TCMD(Tcllux_process_qids_Cmd);
 
 static Ezt_Cmd Ezt_Cmds[] = {
 	{ "ids"      , Tcllux_process_ids_Cmd      },
@@ -53,7 +52,6 @@ static Ezt_Cmd Ezt_Cmds[] = {
 	{ "fork"     , Tcllux_process_fork_Cmd     },
 	{ "exec"     , Tcllux_process_exec_Cmd     },
 	{ "priority" , Tcllux_process_priority_Cmd },
-	{ "qids"     , Tcllux_process_qids_Cmd     },
 	{ NULL, NULL }
 };
 
@@ -77,19 +75,24 @@ static struct Tcllux_processWitch {
 
 /***/
 
+#define LPUTKV(K,V) { Tcl_ListObjAppendElement(NULL,l,Tcl_NewStringObj((K),-1)); \
+		      Tcl_ListObjAppendElement(NULL,l,Tcl_NewLongObj((V)));      }
+
 TCMD(Tcllux_process_ids_Cmd) {
-	Tcl_Obj *d;
+	Tcl_Obj *l;
 	if (objc != 1) {
 		return Ezt_WrongNumArgs(interp, 1, objv, NULL);
 	}
-	d = Tcl_NewDictObj();
-	Tcl_IncrRefCount(d);
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("pid",  -1), Tcl_NewLongObj(getpid()));
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("ppid", -1), Tcl_NewLongObj(getppid()));
-	Tcl_SetObjResult(interp, d);
-	Tcl_DecrRefCount(d);
+	l = Tcl_NewListObj(0, NULL);
+	Tcl_IncrRefCount(l);
+	LPUTKV("pid",  getpid());
+	LPUTKV("ppid", getppid());
+	Tcl_SetObjResult(interp, l);
+	Tcl_DecrRefCount(l);
 	return TCL_OK;
 }
+
+#undef LPUTKV
 
 TCMD(Tcllux_process_gid_Cmd) {
 	if (objc != 1) {
@@ -159,25 +162,6 @@ TCMD(Tcllux_process_priority_Cmd) {
 
 	Tcl_SetObjResult(interp, Tcl_NewIntObj(priority));
 
-	return TCL_OK;
-}
-
-TCMD(Tcllux_process_qids_Cmd) {
-	Tcl_Obj *d;
-	uid_t ruid, euid, suid;
-	if (objc != 1) {
-		return Ezt_WrongNumArgs(interp, 1, objv, NULL);
-	}
-	if (getresuid(&ruid, &euid, &suid) != 0) {
-		return rperr("Couldn't get ids: ");
-	}
-	d = Tcl_NewDictObj();
-	Tcl_IncrRefCount(d);
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("ruid", -1), Tcl_NewLongObj(ruid));
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("euid", -1), Tcl_NewLongObj(euid));
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("suid", -1), Tcl_NewLongObj(suid));
-	Tcl_SetObjResult(interp, d);
-	Tcl_DecrRefCount(d);
 	return TCL_OK;
 }
 

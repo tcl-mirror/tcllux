@@ -55,7 +55,7 @@ static Ezt_Cmd Ezt_Cmds[] = {
 /***/
 
 static int Tcllux_itimer_GetWhich (Tcl_Interp *interp, Tcl_Obj *o, int *which);
-static Tcl_Obj * Tcllux_itimer_ItimerToDict (struct itimerval *itv);
+static Tcl_Obj * Tcllux_itimer_ItimerToKVList (struct itimerval *itv);
 
 /***/
 
@@ -68,7 +68,7 @@ TCMD(Tcllux_itimer_itimers_Cmd) {
 }
 
 TCMD(Tcllux_itimer_get_Cmd) {
-	Tcl_Obj *d;
+	Tcl_Obj *l;
 	struct itimerval itv;
 	int which;
 
@@ -88,15 +88,15 @@ TCMD(Tcllux_itimer_get_Cmd) {
 		return rperr("Couldn't get itimer: ");
 	}
 
-	d = Tcllux_itimer_ItimerToDict(&itv);
-	Tcl_SetObjResult(interp, d);
-	Tcl_DecrRefCount(d);
+	l = Tcllux_itimer_ItimerToKVList(&itv);
+	Tcl_SetObjResult(interp, l);
+	Tcl_DecrRefCount(l);
 
 	return TCL_OK;
 }
 
 TCMD(Tcllux_itimer_set_Cmd) {
-	Tcl_Obj *d;
+	Tcl_Obj *l;
 	struct itimerval itv;
 	struct itimerval itv_out;
 	int which;
@@ -126,9 +126,9 @@ TCMD(Tcllux_itimer_set_Cmd) {
 		return rperr("Couldn't set itimer: ");
 	}
 
-	d = Tcllux_itimer_ItimerToDict(&itv_out);
-	Tcl_SetObjResult(interp, d);
-	Tcl_DecrRefCount(d);
+	l = Tcllux_itimer_ItimerToKVList(&itv_out);
+	Tcl_SetObjResult(interp, l);
+	Tcl_DecrRefCount(l);
 
 	return TCL_OK;
 }
@@ -152,13 +152,20 @@ Tcllux_itimer_GetWhich (Tcl_Interp *interp, Tcl_Obj *o, int *which) {
 
 /* Returned Obj has refcount 1. */
 static Tcl_Obj *
-Tcllux_itimer_ItimerToDict (struct itimerval *itv) {
-	Tcl_Obj *d;
-	d = Tcl_NewDictObj();
-	Tcl_IncrRefCount(d);
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("interval", -1), Ezt_TimevalToDoubleObj(&itv->it_interval));
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("value",    -1), Ezt_TimevalToDoubleObj(&itv->it_value));
-	return d;
+Tcllux_itimer_ItimerToKVList (struct itimerval *itv) {
+	Tcl_Obj *l;
+	l = Tcl_NewListObj(0, NULL);
+	Tcl_IncrRefCount(l);
+
+#define LPUTKV(K,V) { Tcl_ListObjAppendElement(NULL,l,Tcl_NewStringObj((K),-1));    \
+		      Tcl_ListObjAppendElement(NULL,l,Ezt_TimevalToDoubleObj((V))); }
+
+	LPUTKV("interval", &itv->it_interval);
+	LPUTKV("value",    &itv->it_value);
+
+#undef LPUTKV
+
+	return l;
 }
 
 /***/

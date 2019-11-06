@@ -24,9 +24,10 @@
 extern "C" {
 #endif
 
+#define _GNU_SOURCE 1	/* Needed for getresuid on some systems */
 
+#include <unistd.h>	/* getlogin_r,getresuid */
 #include <sys/types.h>	/* getlogin_r,getresuid */
-#include <unistd.h>	/* getlogin_r */
 #include <limits.h>	/* LOGIN_NAME_MAX */
 
 #include <tcl.h>
@@ -63,8 +64,11 @@ TCMD(Tcllux_user_login_Cmd) {
 	return TCL_OK;
 }
 
+#define LPUTKV(K,V) { Tcl_ListObjAppendElement(NULL,l,Tcl_NewStringObj((K),-1)); \
+		      Tcl_ListObjAppendElement(NULL,l,Tcl_NewLongObj((V)));      }
+
 TCMD(Tcllux_user_ids_Cmd) {
-	Tcl_Obj *d;
+	Tcl_Obj *l;
 	uid_t ruid, euid, suid;
 	if (objc != 1) {
 		return Ezt_WrongNumArgs(interp, 1, objv, NULL);
@@ -72,15 +76,17 @@ TCMD(Tcllux_user_ids_Cmd) {
 	if (getresuid(&ruid, &euid, &suid) != 0) {
 		return rperr("Couldn't get ids: ");
 	}
-	d = Tcl_NewDictObj();
-	Tcl_IncrRefCount(d);
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("ruid", -1), Tcl_NewLongObj(ruid));
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("euid", -1), Tcl_NewLongObj(euid));
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("suid", -1), Tcl_NewLongObj(suid));
-	Tcl_SetObjResult(interp, d);
-	Tcl_DecrRefCount(d);
+	l = Tcl_NewListObj(0, NULL);
+	Tcl_IncrRefCount(l);
+	LPUTKV("ruid", ruid);
+	LPUTKV("euid", euid);
+	LPUTKV("suid", suid);
+	Tcl_SetObjResult(interp, l);
+	Tcl_DecrRefCount(l);
 	return TCL_OK;
 }
+
+#undef LPUTKV
 
 #include "ezt_funcs.c"
 

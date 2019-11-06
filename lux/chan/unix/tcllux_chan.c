@@ -147,6 +147,7 @@ typedef struct Tcllux_chan_chanOptsToProcess {
 	int objIdx; /* Index into objv */
 } Tcllux_chan_chanOptsToProcess;
 
+static void Tcllux_chan_ChanInitChanOptVals (Tcllux_chan_chanOptVals *ov);
 static int Tcllux_chan_ChanGetOpt   (Tcl_Interp *interp, Tcl_Channel ch, enum tcllux_chan_chanOpts id, Tcl_Obj **po);
 static int Tcllux_chan_ChanSetOpt   (Tcl_Interp *interp, Tcl_Channel ch, enum tcllux_chan_chanOpts id, Tcllux_chan_chanOptVals *ov);
 static int Tcllux_chan_ChanCheckOpt (Tcl_Interp *interp, enum tcllux_chan_chanOpts id, Tcllux_chan_chanOptVals *ov, Tcl_Obj *qo);
@@ -175,6 +176,21 @@ static Ezt_Cmd Ezt_Cmds[] = {
 
 /***/
 
+static int
+Tcllux_chan_GetChannelHandle (Tcl_Channel ch, int direction, int *handlePtr) {
+	ClientData hd;
+	if (Tcl_GetChannelHandle(ch, direction, &hd) != TCL_OK) { return TCL_ERROR; }
+	*handlePtr = PTR2INT(hd);
+	return TCL_OK;
+}
+
+/***/
+
+static void
+Tcllux_chan_ChanInitChanOptVals (Tcllux_chan_chanOptVals *ov) {
+	ov->closeonexec = 0;
+}
+
 /*
  * On success, obj will have refcount 1.
  * On failure, no obj will be created.
@@ -185,7 +201,9 @@ Tcllux_chan_ChanGetOpt (Tcl_Interp *interp, Tcl_Channel ch, enum tcllux_chan_cha
 	int val;
 	Tcl_Obj *o = NULL;
 
-	if (Tcl_GetChannelHandle(ch, (TCL_READABLE | TCL_WRITABLE), (ClientData) &hd) != TCL_OK) { return TCL_ERROR; }
+	if (Tcllux_chan_GetChannelHandle(ch, (TCL_READABLE | TCL_WRITABLE), &hd) != TCL_OK) {
+		return TCL_ERROR;
+	}
 
 	val = 0;
 
@@ -235,7 +253,9 @@ Tcllux_chan_ChanSetOpt (Tcl_Interp *interp, Tcl_Channel ch, enum tcllux_chan_cha
 	int hd;
 	int val;
 
-	if (Tcl_GetChannelHandle(ch, (TCL_READABLE | TCL_WRITABLE), (ClientData) &hd) != TCL_OK) { return TCL_ERROR; }
+	if (Tcllux_chan_GetChannelHandle(ch, (TCL_READABLE | TCL_WRITABLE), &hd) != TCL_OK) {
+		return TCL_ERROR;
+	}
 
 	switch (id) {
 	case LUXCHAN_CHANOPT_CLOSEONEXEC:
@@ -267,6 +287,8 @@ TCMD(Tcllux_chan_configure_Cmd) {
 	}
 
 	if ((ch = Tcl_GetChannel(interp, Tcl_GetString(objv[1]), &mode)) == NULL) { return TCL_ERROR; }
+
+	Tcllux_chan_ChanInitChanOptVals(&ov);
 
 	if (objc == 3) { /* Get the value of one option */
 		if (Tcl_GetIndexFromObjStruct(interp, objv[2], Tcllux_chan_chanOpts, sizeof(Tcllux_chan_chanOpts[0]), "option", TCL_EXACT, &idx) != TCL_OK) { return TCL_ERROR; }
@@ -331,38 +353,41 @@ TCMD(Tcllux_chan_configure_Cmd) {
 
 	} else { /* Get the values of almost all options */
 		Tcl_Obj *result;
-		Tcl_Obj *errors;
-		int z;
+		Tcl_Obj *errors = NULL;
+		int errCode;
 
-		result = Tcl_NewDictObj();
+		result = Tcl_NewListObj(0, NULL);
 		Tcl_IncrRefCount(result);
 
-		errors = Tcl_NewDictObj();
-		Tcl_IncrRefCount(errors);
+#define LPUTLKV(L,K,V) { Tcl_ListObjAppendElement(NULL,(L),Tcl_NewStringObj((K),-1)); \
+			 Tcl_ListObjAppendElement(NULL,(L),(V));                      }
 
 		for (i = 0; i < COMBIEN(Tcllux_chan_chanOpts) - 1; i++) {
 			if ((Tcllux_chan_chanOpts[i].flags & LUXCHAN_CHANOPTFLAG_RD) != LUXCHAN_CHANOPTFLAG_RD) {
 				continue;
 			}
-			if ((z = Tcllux_chan_ChanGetOpt(interp, ch, Tcllux_chan_chanOpts[i].id, &o)) != TCL_OK) {
-				Tcl_DictObjPut(NULL, errors, Tcl_NewStringObj(Tcllux_chan_chanOpts[i].name, -1), Tcl_GetReturnOptions(interp, z));
-				o = Tcl_NewStringObj("",-1);
-				Tcl_IncrRefCount(o);
+			if ((errCode = Tcllux_chan_ChanGetOpt(interp, ch, Tcllux_chan_chanOpts[i].id, &o)) != TCL_OK) {
+				errors = Tcl_NewListObj(0, NULL);
+				Tcl_IncrRefCount(errors);
+				LPUTLKV(errors, Tcllux_chan_chanOpts[i].name, Tcl_GetReturnOptions(interp, errCode));
+				continue;
 			}
-			Tcl_DictObjPut(NULL, result, Tcl_NewStringObj(Tcllux_chan_chanOpts[i].name, -1), o);
+			LPUTLKV(result, Tcllux_chan_chanOpts[i].name, o);
 			Tcl_DecrRefCount(o);
 		}
 
-		if (Tcl_DictObjSize(NULL, result, &z) == TCL_ERROR) {
+		if (Tcl_ListObjLength(NULL, result, &i) == TCL_ERROR) {
 			Tcl_Panic("%s", "Yes it's true, this man has no dict.");
 		}
-		if (z > 0) {
-			Tcl_DictObjPut(NULL, result, Tcl_NewStringObj("-errors", -1), errors);
+		if (errors != NULL) {
+			LPUTLKV(result, "-errors", errors);
+			Tcl_DecrRefCount(errors);
 		}
+
+#undef LPUTLKV
 
 		Tcl_SetObjResult(interp, result);
 		Tcl_DecrRefCount(result);
-		Tcl_DecrRefCount(errors);
 	}
 
 	return TCL_OK;
@@ -383,9 +408,9 @@ TCMD(Tcllux_chan_fsync_Cmd) {
 
 	if ((ch = Tcl_GetChannel(interp, Tcl_GetString(objv[1]), &mode)) == NULL) { return TCL_ERROR; }
 
-	if (Tcl_GetChannelHandle(ch, mode, (ClientData) &hd) != TCL_OK) { return TCL_ERROR; }
+	if (Tcllux_chan_GetChannelHandle(ch, mode, &hd) != TCL_OK) { return TCL_ERROR; }
 
-	if ((int) clientData) {
+	if (PTR2INT(clientData)) {
 		if (fdatasync(hd) == -1) { return rperr("Couldn't fdatasync: "); }
 	} else {
 		if (fsync(hd) == -1) { return rperr("Couldn't fsync: "); }
@@ -407,7 +432,7 @@ TCMD(Tcllux_chan_dup_Cmd) {
 	if ((ch = Tcl_GetChannel(interp, Tcl_GetString(objv[1]), &mode)) == NULL) {
 		return TCL_ERROR;
 	}
-	if (Tcl_GetChannelHandle(ch, mode, (ClientData) &hd) != TCL_OK) {
+	if (Tcllux_chan_GetChannelHandle(ch, mode, &hd) != TCL_OK) {
 		 return TCL_ERROR;
 	}
 	if ((newhd = dup(hd)) == -1) {
@@ -418,7 +443,7 @@ TCMD(Tcllux_chan_dup_Cmd) {
 		return rperr("Couldn't dup: ");
 	}
 
-	newch = Tcl_MakeFileChannel(INT2PTR(newhd), mode);
+	newch = Tcl_MakeFileChannel((ClientData) INT2PTR(newhd), mode);
 
 	Tcl_RegisterChannel(interp, newch);
 
@@ -442,7 +467,7 @@ TCMD(Tcllux_chan_lock_Cmd) {
 	short l_type;
 	int l_start = 0;
 	int l_len = 0;
-	int cmd_idx = (int) clientData;
+	int cmd_idx = PTR2INT(clientData);
 
 	if (objc < 2) {
 		return Ezt_WrongNumArgs(interp, 1, objv, "channelId ?options?");
@@ -450,7 +475,7 @@ TCMD(Tcllux_chan_lock_Cmd) {
 	if ((ch = Tcl_GetChannel(interp, Tcl_GetString(objv[1]), &mode)) == NULL) {
 		return TCL_ERROR;
 	}
-	if (Tcl_GetChannelHandle(ch, mode, (ClientData) &hd) != TCL_OK) {
+	if (Tcllux_chan_GetChannelHandle(ch, mode, &hd) != TCL_OK) {
 		 return TCL_ERROR;
 	}
 	for (i = 2; i < objc; i++) {
@@ -521,7 +546,7 @@ TCMD(Tcllux_chan_owner_Cmd) {
 	if ((ch = Tcl_GetChannel(interp, Tcl_GetString(objv[1]), &mode)) == NULL) {
 		return TCL_ERROR;
 	}
-	if (Tcl_GetChannelHandle(ch, mode, (ClientData) &hd) != TCL_OK) {
+	if (Tcllux_chan_GetChannelHandle(ch, mode, &hd) != TCL_OK) {
 		 return TCL_ERROR;
 	}
 	if (objc == 3) {

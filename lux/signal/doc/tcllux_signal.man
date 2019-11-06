@@ -1,10 +1,10 @@
-[manpage_begin tcllux::signal n 1.0]
+[manpage_begin tcllux::signal n 0.5]
 [require   Tcl 8.6]
-[require   tcllux::signal [opt 1.0]]
+[require   tcllux::signal [opt 0.5]]
 [moddesc   {tcllux::signal}]
 [titledesc {TclLux signal}]
 [category  {UNIX}]
-[copyright {2018 Stuart Cassoff <stwo@users.sourceforge.net>}]
+[copyright {2019 Stuart Cassoff <stwo@users.sourceforge.net>}]
 [keywords  unix signal]
 [see_also  signal(3)]
 
@@ -22,9 +22,8 @@
 [list_begin definitions]
 
 	[call [cmd {lux signal signals}]]
-		Returns a list of dicts.
-		Keys: name. Values: descr.
-		Index in list is signal number.
+		Returns a list of 3-element lists.
+		Columns: name, number description.
 
 	[call [cmd {lux signal set}] [arg signal] [opt [arg action]] [opt [arg send]]]
 		Returns signal info if only [arg signal] supplied.
@@ -32,14 +31,45 @@
 		If [arg action] is [const ignore] then the signal will be ignored.
 		If [arg action] is a Tcl channel then data will be written to the channel upon receipt of the signal.
 		If [arg send] is [const signal] then the signal number will be written to the channel as one byte.
-		If [arg send] is [const timestamp] then a timestamp (seconds and nanoseconds) of when the signal was received will be written to the channel as two longs.
+		If [arg send] is [const timestamp] then a timestamp (seconds and nanoseconds) of when the signal was received will be written to the channel as two uint64_t (128 bytes).
 		The default for [arg send] is [const signal].
+		Attempting to set signal 0 does nothing.
 		Returns an empty string.
 
 	[call [cmd {lux signal send}] [arg signal] [arg pid]]
 		Send signal [arg signal] to process [arg pid].
+		Signal 0 can be used for pid checks.
 		Returns an empty string.
 
 [list_end]
+
+
+[section EXAMPLES]
+
+[example {
+proc sigreceiver {chan send} {
+	if {$send eq "timestamp"} {
+		binary scan [read $chan 16] mm s ns
+		puts $s.$ns
+	} elseif {$send eq "signal"} {
+		binary scan [read $chan 1] c s
+		puts $s
+	}
+}
+
+proc sigsetup {sig} {
+	set send signal
+	#set send timestamp
+	lassign [chan pipe] r w
+	chan configure $r -translation binary -blocking 0
+	chan configure $w -translation binary -blocking 0
+	fileevent $r readable [list sigreceiver $r $send]
+	lux signal set $sig $w $send
+}
+
+sigsetup hup
+
+lux signal send hup [pid]
+}]
 
 [manpage_end]

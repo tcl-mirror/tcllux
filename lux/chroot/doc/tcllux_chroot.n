@@ -1,8 +1,8 @@
 '\"
 '\" Generated from file 'tcllux_chroot\&.man' by tcllib/doctools with format 'nroff'
-'\" Copyright (c) 2018 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
+'\" Copyright (c) 2019 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
 '\"
-.TH "tcllux::chroot" n 1\&.0 tcllux_chroot "tcllux::chroot"
+.TH "tcllux::chroot" n 0\&.5 tcllux_chroot "tcllux::chroot"
 .\" The -*- nroff -*- definitions below are for supplemental macros used
 .\" in Tcl/Tk manual entries.
 .\"
@@ -276,7 +276,7 @@ tcllux::chroot \- TclLux chroot
 .SH SYNOPSIS
 package require \fBTcl  8\&.6\fR
 .sp
-package require \fBtcllux::chroot  ?1\&.0?\fR
+package require \fBtcllux::chroot  ?0\&.5?\fR
 .sp
 namespace import ::tcllux::lux
 .sp
@@ -300,6 +300,6 @@ chroot, unix
 UNIX
 .SH COPYRIGHT
 .nf
-Copyright (c) 2018 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
+Copyright (c) 2019 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
 
 .fi

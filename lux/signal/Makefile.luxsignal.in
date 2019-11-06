@@ -1,0 +1,17 @@
+${srcdir}/unix/tcllux_signal_signals.c:
+	${SH} ${srcdir}/tools/mksignals > ${srcdir}/unix/tcllux_signal_signals.c
+
+lux-signal-dist: dist-ext
+	d=unix; \
+	files='tcllux_signal_signals.c'; \
+	for f in $$files; do \
+	    $(DIST_INSTALL_DATA) ${srcdir}/$$d/$$f $(DIST_DIR)/$$d/; \
+	done
+	$(INSTALL_DATA_DIR) $(DIST_DIR)/tools
+	d=tools; \
+	files='mksignals'; \
+	for f in $$files; do \
+	    $(DIST_INSTALL_DATA) ${srcdir}/$$d/$$f $(DIST_DIR)/$$d/; \
+	done
+
+.PHONY: lux-signal-dist

@@ -93,12 +93,12 @@
 </head>
 <!-- Generated from file 'tcllux_signal.man' by tcllib/doctools with format 'html'
    -->
-<!-- Copyright &amp;copy; 2018 Stuart Cassoff &amp;lt;stwo@users.sourceforge.net&amp;gt;
+<!-- Copyright &amp;copy; 2019 Stuart Cassoff &amp;lt;stwo@users.sourceforge.net&amp;gt;
    -->
 <!-- tcllux::signal.n
    -->
 <body><div class="doctools">
-<h1 class="doctools_title">tcllux::signal(n) 1.0 tcllux_signal &quot;tcllux::signal&quot;</h1>
+<h1 class="doctools_title">tcllux::signal(n) 0.5 tcllux_signal &quot;tcllux::signal&quot;</h1>
 <div id="name" class="doctools_section"><h2><a name="name">Name</a></h2>
 <p>tcllux::signal - TclLux signal</p>
 </div>
@@ -108,6 +108,7 @@
 <li class="doctools_section"><a href="#synopsis">Synopsis</a></li>
 <li class="doctools_section"><a href="#section1">Description</a></li>
 <li class="doctools_section"><a href="#section2">COMMANDS</a></li>
+<li class="doctools_section"><a href="#section3">EXAMPLES</a></li>
 <li class="doctools_section"><a href="#see-also">See Also</a></li>
 <li class="doctools_section"><a href="#keywords">Keywords</a></li>
 <li class="doctools_section"><a href="#category">Category</a></li>
@@ -118,7 +119,7 @@
 <div class="doctools_synopsis">
 <ul class="doctools_requirements">
 <li>package require <b class="pkgname">Tcl 8.6</b></li>
-<li>package require <b class="pkgname">tcllux::signal <span class="opt">?1.0?</span></b></li>
+<li>package require <b class="pkgname">tcllux::signal <span class="opt">?0.5?</span></b></li>
 </ul>
 <ul class="doctools_syntax">
 <li>namespace import ::tcllux::lux</li>
@@ -138,22 +139,47 @@
 <dl class="doctools_definitions">
 	
 <dt><a name="1"><b class="cmd">lux signal signals</b></a></dt>
-<dd><p>Returns a list of dicts.
-		Keys: name. Values: descr.
-		Index in list is signal number.</p></dd>
+<dd><p>Returns a list of 3-element lists.
+		Columns: name, number description.</p></dd>
 <dt><a name="2"><b class="cmd">lux signal set</b> <i class="arg">signal</i> <span class="opt">?<i class="arg">action</i>?</span> <span class="opt">?<i class="arg">send</i>?</span></a></dt>
 <dd><p>Returns signal info if only <i class="arg">signal</i> supplied.
 		If <i class="arg">action</i> is <b class="const">default</b> then the system default action will be taken upon receipt of the signal.
 		If <i class="arg">action</i> is <b class="const">ignore</b> then the signal will be ignored.
 		If <i class="arg">action</i> is a Tcl channel then data will be written to the channel upon receipt of the signal.
 		If <i class="arg">send</i> is <b class="const">signal</b> then the signal number will be written to the channel as one byte.
-		If <i class="arg">send</i> is <b class="const">timestamp</b> then a timestamp (seconds and nanoseconds) of when the signal was received will be written to the channel as two longs.
+		If <i class="arg">send</i> is <b class="const">timestamp</b> then a timestamp (seconds and nanoseconds) of when the signal was received will be written to the channel as two uint64_t (128 bytes).
 		The default for <i class="arg">send</i> is <b class="const">signal</b>.
+		Attempting to set signal 0 does nothing.
 		Returns an empty string.</p></dd>
 <dt><a name="3"><b class="cmd">lux signal send</b> <i class="arg">signal</i> <i class="arg">pid</i></a></dt>
 <dd><p>Send signal <i class="arg">signal</i> to process <i class="arg">pid</i>.
+		Signal 0 can be used for pid checks.
 		Returns an empty string.</p></dd>
 </dl>
+</div>
+<div id="section3" class="doctools_section"><h2><a name="section3">EXAMPLES</a></h2>
+<pre class="doctools_example">
+proc sigreceiver {chan send} {
+	if {$send eq &quot;timestamp&quot;} {
+		binary scan [read $chan 16] mm s ns
+		puts $s.$ns
+	} elseif {$send eq &quot;signal&quot;} {
+		binary scan [read $chan 1] c s
+		puts $s
+	}
+}
+proc sigsetup {sig} {
+	set send signal
+	#set send timestamp
+	lassign [chan pipe] r w
+	chan configure $r -translation binary -blocking 0
+	chan configure $w -translation binary -blocking 0
+	fileevent $r readable [list sigreceiver $r $send]
+	lux signal set $sig $w $send
+}
+sigsetup hup
+lux signal send hup [pid]
+</pre>
 </div>
 <div id="see-also" class="doctools_section"><h2><a name="see-also">See Also</a></h2>
 <p>signal(3)</p>
@@ -165,6 +191,6 @@
 <p>UNIX</p>
 </div>
 <div id="copyright" class="doctools_section"><h2><a name="copyright">Copyright</a></h2>
-<p>Copyright &copy; 2018 Stuart Cassoff &lt;stwo@users.sourceforge.net&gt;</p>
+<p>Copyright &copy; 2019 Stuart Cassoff &lt;stwo@users.sourceforge.net&gt;</p>
 </div>
 </div></body></html>

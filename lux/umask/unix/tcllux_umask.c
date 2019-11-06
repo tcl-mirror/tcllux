@@ -57,9 +57,11 @@ TCMD(Tcllux_umask_umask_Cmd) {
 
 	if (objc == 2) {
 		mode_t mask_new;
-		if (Tcl_GetIntFromObj(interp, objv[1], &mask_new) != TCL_OK) {
+		int i;
+		if (Tcl_GetIntFromObj(interp, objv[1], &i) != TCL_OK) {
 			return TCL_ERROR;
 		}
+		mask_new = i;
 		mask_old = umask(mask_new);
 	} else {
 		mask_old = umask(0);

@@ -2,7 +2,7 @@ what:	TclLuX Chroot
 where:	https://chiselapp.com/user/stwo/repository/tcllux
 who:	Stuart Cassoff <stwo@users.sourceforge.net>
 why:	Chroot functionality
-when:	Winter 2019 (0.2), Summer 2018 (0.1)
+when:	Summer 2019 (0.5,0.4,0.3), Winter 2019 (0.2), Summer 2018 (0.1)
 how:	$ /path/to/configure ?options? && make
 how:	$ make test
 how:	$ make install

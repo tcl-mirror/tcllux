@@ -6,35 +6,29 @@ package require Tcl 8.6
 package require tcltest 2
 namespace import ::tcltest::test
 
+namespace import ::tcltest::testConstraint
+testConstraint shared [expr {![testConstraint static]}]
+
 
 test tcllux-0.0 {Free test pass for getting this far} -body {} -result {}
 
-package require tcllux::chan
-test tcllux-1.0 {Free test pass for getting this far} -body {} -result {}
+test tcllux-1.0 {Load package} -constraints shared -body { package require tcllux::chan    } -result 0.5
 
-package require tcllux::chroot
-test tcllux-2.0 {Free test pass for getting this far} -body {} -result {}
+test tcllux-2.0 {Load package} -constraints shared -body { package require tcllux::chroot  } -result 0.5
 
-package require tcllux::itimer
-test tcllux-3.0 {Free test pass for getting this far} -body {} -result {}
+test tcllux-3.0 {Load package} -constraints shared -body { package require tcllux::itimer  } -result 0.5
 
-package require tcllux::process
-test tcllux-4.0 {Free test pass for getting this far} -body {} -result {}
+test tcllux-4.0 {Load package} -constraints shared -body { package require tcllux::process } -result 0.5
 
-package require tcllux::rusage
-test tcllux-5.0 {Free test pass for getting this far} -body {} -result {}
+test tcllux-5.0 {Load package} -constraints shared -body { package require tcllux::rusage  } -result 0.5
 
-package require tcllux::signal
-test tcllux-6.0 {Free test pass for getting this far} -body {} -result {}
+test tcllux-6.0 {Load package} -constraints shared -body { package require tcllux::signal  } -result 0.5
 
-package require tcllux::umask
-test tcllux-7.0 {Free test pass for getting this far} -body {} -result {}
+test tcllux-7.0 {Load package} -constraints shared -body { package require tcllux::umask   } -result 0.5
 
-package require tcllux::uname
-test tcllux-8.0 {Free test pass for getting this far} -body {} -result {}
+test tcllux-8.0 {Load package} -constraints shared -body { package require tcllux::uname   } -result 0.5
 
-package require tcllux::user
-test tcllux-9.0 {Free test pass for getting this far} -body {} -result {}
+test tcllux-9.0 {Load package} -constraints shared -body { package require tcllux::user    } -result 0.5
 
 
 # cleanup

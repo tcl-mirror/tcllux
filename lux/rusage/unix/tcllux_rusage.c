@@ -47,7 +47,7 @@ TCMD(Tcllux_rusage_rusage_Cmd);
 /***/
 
 TCMD(Tcllux_rusage_rusage_Cmd) {
-	Tcl_Obj *d;
+	Tcl_Obj *l;
 	int who = RUSAGE_SELF;
 	struct rusage r;
 
@@ -79,33 +79,37 @@ TCMD(Tcllux_rusage_rusage_Cmd) {
 		return rperr("Couldn't get rusage: ");
 	}
 
-	d = Tcl_NewDictObj();
-	Tcl_IncrRefCount(d);
+	l = Tcl_NewListObj(0, NULL);
+	Tcl_IncrRefCount(l);
 
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("rusage", -1), objc > 1 ? objv[1] : Tcl_NewStringObj("self", -1));
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("utime",  -1), Ezt_TimevalToDoubleObj(&r.ru_utime));
-	Tcl_DictObjPut(NULL, d, Tcl_NewStringObj("stime",  -1), Ezt_TimevalToDoubleObj(&r.ru_stime));
+	Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj("rusage", -1));
+	Tcl_ListObjAppendElement(NULL, l, objc > 1 ? objv[1] : Tcl_NewStringObj("self", -1));
+	Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj("utime",  -1));
+	Tcl_ListObjAppendElement(NULL, l, Ezt_TimevalToDoubleObj(&r.ru_utime));
+	Tcl_ListObjAppendElement(NULL, l, Tcl_NewStringObj("stime",  -1));
+	Tcl_ListObjAppendElement(NULL, l, Ezt_TimevalToDoubleObj(&r.ru_stime));
 
-#define MyDictPutLong(K,V) Tcl_DictObjPut(NULL,d,Tcl_NewStringObj((K),-1),Tcl_NewLongObj((V)))
+#define LPUTKV(K,V) { Tcl_ListObjAppendElement(NULL,l,Tcl_NewStringObj((K),-1)); \
+		      Tcl_ListObjAppendElement(NULL,l,Tcl_NewLongObj((V)));      }
 
-	MyDictPutLong("maxrss",   r.ru_maxrss);
-	MyDictPutLong("ixrss",    r.ru_ixrss);
-	MyDictPutLong("idrss",    r.ru_idrss);
-	MyDictPutLong("isrss",    r.ru_isrss);
-	MyDictPutLong("minflt",   r.ru_minflt);
-	MyDictPutLong("majflt",   r.ru_majflt);
-	MyDictPutLong("nswap",    r.ru_nswap);
-	MyDictPutLong("inblock",  r.ru_inblock);
-	MyDictPutLong("oublock",  r.ru_oublock);
-	MyDictPutLong("msgsnd",   r.ru_msgsnd);
-	MyDictPutLong("msgrcv",   r.ru_msgrcv);
-	MyDictPutLong("nsignals", r.ru_nsignals);
-	MyDictPutLong("nivcsw",   r.ru_nivcsw);
+	LPUTKV("maxrss",   r.ru_maxrss);
+	LPUTKV("ixrss",    r.ru_ixrss);
+	LPUTKV("idrss",    r.ru_idrss);
+	LPUTKV("isrss",    r.ru_isrss);
+	LPUTKV("minflt",   r.ru_minflt);
+	LPUTKV("majflt",   r.ru_majflt);
+	LPUTKV("nswap",    r.ru_nswap);
+	LPUTKV("inblock",  r.ru_inblock);
+	LPUTKV("oublock",  r.ru_oublock);
+	LPUTKV("msgsnd",   r.ru_msgsnd);
+	LPUTKV("msgrcv",   r.ru_msgrcv);
+	LPUTKV("nsignals", r.ru_nsignals);
+	LPUTKV("nivcsw",   r.ru_nivcsw);
 
-#undef MyDictPutLong
+#undef LPUTKV
 
-	Tcl_SetObjResult(interp, d);
-	Tcl_DecrRefCount(d);
+	Tcl_SetObjResult(interp, l);
+	Tcl_DecrRefCount(l);
 
 	return TCL_OK;
 }

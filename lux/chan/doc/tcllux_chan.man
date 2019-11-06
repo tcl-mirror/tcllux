@@ -1,10 +1,10 @@
-[manpage_begin tcllux::chan n 1.0]
+[manpage_begin tcllux::chan n 0.5]
 [require   Tcl 8.6]
-[require   tcllux::chan [opt 1.0]]
+[require   tcllux::chan [opt 0.5]]
 [moddesc   {tcllux::chan}]
 [titledesc {TclLux chan}]
 [category  {UNIX}]
-[copyright {2018 Stuart Cassoff <stwo@users.sourceforge.net>}]
+[copyright {2019 Stuart Cassoff <stwo@users.sourceforge.net>}]
 [keywords  unix chan]
 [see_also  fcntl(2) sync(2) fsync(2)]
 

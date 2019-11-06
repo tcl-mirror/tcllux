@@ -12,7 +12,7 @@ exec tclsh${TCL} "$0" "$@"
 # Summer 2018
 #
 
-[namespace eval uxl {
+[namespace eval ::TclLuX {
 
 proc sigmund {chan} {
 	read $chan

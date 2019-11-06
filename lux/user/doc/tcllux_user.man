@@ -1,10 +1,10 @@
-[manpage_begin tcllux::user n 1.0]
+[manpage_begin tcllux::user n 0.5]
 [require   Tcl 8.6]
-[require   tcllux::user [opt 1.0]]
+[require   tcllux::user [opt 0.5]]
 [moddesc   {tcllux::user}]
 [titledesc {TclLux User}]
 [category  {UNIX}]
-[copyright {2018 Stuart Cassoff <stwo@users.sourceforge.net>}]
+[copyright {2019 Stuart Cassoff <stwo@users.sourceforge.net>}]
 [keywords  unix user]
 [see_also  getlogin_r(2) getresuid(2)]
 
@@ -20,7 +20,7 @@
 [list_begin definitions]
 
 	[call [cmd {lux user ids}]]
-		Returns a dict. Keys: ruid euid euid.
+		Returns a list of key-value pairs. Keys: ruid euid suid.
 
 	[call [cmd {lux user login}]]
 		Returns current user login name.

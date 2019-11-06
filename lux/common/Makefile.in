@@ -15,6 +15,7 @@ asrcdir		= @asrcdir@
 cwd		= @cwd@
 
 prefix		= @prefix@
+exec_prefix	= @exec_prefix@
 appdir		= @appdir@
 pkgdir		= @pkgdir@
 moddir		= @moddir@
@@ -26,19 +27,25 @@ bindir		= @bindir@
 
 VPATH		= @VPATH@
 
+SH		= @SH@
 CC		= @CC@
+AR		= @AR@
+RANLIB		= @RANLIB@
+
 CFLAGS_CC	= @CFLAGS_CC@
 CFLAGS_WARN	= @CFLAGS_WARN@
 CFLAGS_OPT	= @CFLAGS_OPT@
-CFLAGS_SH	= @CFLAGS_SH@
+CFLAGS_BUILD	= @CFLAGS_BUILD@
 CFLAGS_TH	= @CFLAGS_TH@
-LIBS_TH		= @LIBS_TH@
-DEFS_TH		= @DEFS_TH@
-DEFS_OPT	= @DEFS_OPT@
+CFLAGS_DEBUG	= @CFLAGS_DEBUG@
 LDFLAGS		= @LDFLAGS@
-LDFLAGS_SH	= @LDFLAGS_SH@
+LDFLAGS_BUILD	= @LDFLAGS_BUILD@
+LIBS_TH		= @LIBS_TH@
+DEFS_OPT	= @DEFS_OPT@
+DEFS_TH		= @DEFS_TH@
 DEFS_TCL	= @DEFS_TCL@
 DEFS_JIM	= @DEFS_JIM@
+DEFS_TK		= @DEFS_TK@
 DEFS		= @DEFS@
 DEFS_SPOT	= @DEFS_SPOT@ -DFOR_WHAT=\"${FOR_WHAT}\"
 EXT_DEFS	= @EXT_DEFS@
@@ -46,31 +53,37 @@ EXT_INC_SPEC	= @EXT_INC_SPEC@
 EXT_LIB_SPEC	= @EXT_LIB_SPEC@
 TCL_INC_SPEC	= @TCL_INC_SPEC@
 JIM_INC_SPEC	= @JIM_INC_SPEC@
+TK_INC_SPEC	= @TK_INC_SPEC@
 TCL_LIB_SPEC	= @TCL_LIB_SPEC@
 JIM_LIB_SPEC	= @JIM_LIB_SPEC@
+TK_LIB_SPEC	= @TK_LIB_SPEC@
 TCL_STUB_LIB_SPEC = @TCL_STUB_LIB_SPEC@
+TK_STUB_LIB_SPEC = @TK_STUB_LIB_SPEC@
 
 CC_INC_SPEC	= @CC_INC_SPEC@
 LD_LIB_SPEC	= @LD_LIB_SPEC@
 INC_SPEC	= ${EXT_INC_SPEC} ${CC_INC_SPEC}
 LIB_SPEC	= ${EXT_LIB_SPEC} ${LD_LIB_SPEC}
 
-CFLAGS_DEBUG	= @CFLAGS_DEBUG@
-
-SRC		= ${NAME}.c
-OBJ		= ${NAME}.o
 LIB		= @LIB@
 SHLIB		= @SHLIB@
-SCLIB		= @LIBDIR@@SCLIB@
+STLIB		= @STLIB@
+LIBSRC		= @LIBSRC@
+LIBOBJ		= @LIBOBJ@
+SCLIB		= ${BUILD_DIR}@SCLIB@
 SCLIBSRC	= @SCLIBSRC@
-LIBDIR		= @LIBDIR@
+SCLIBSRCDIR	= @SCLIBSRCDIR@
+BIN		= @BIN@
+BINOBJ		= @BINOBJ@
+BINSRC		= @BINSRC@
+SCBIN		= @SCBIN@
+SCBINSRC	= @SCBINSRC@
 DOC		= @DOC@
 DOCSRC		= @DOCSRC@
 DOCBLD		= @DOCBLD@
 DOCFMT		= @DOCFMT@
-SCBIN		= @SCBIN@
-SCBINSRC	= @SCBINSRC@
 PKGINDEX	= @PKGINDEX@
+BUILD_DIR	= @BUILD_DIR@
 
 EXT_DEP_FILES	= @EXT_DEP_FILES@
 EXT_BUILD 	= @EXT_BUILD@
@@ -78,12 +91,14 @@ EXT_BUILD 	= @EXT_BUILD@
 DAT_DIR		= @DAT_DIR@
 DAT_FILES	= @DAT_FILES@
 
+EXA_FILES	= @EXA_FILES@
+EXA_SCRIPTS	= @EXA_SCRIPTS@
+
 PKGS		= @PKGS@
 PKGS_DIR	= @PKGS_DIR@
 
 BJE		= @BJE@
-SH		= @SH@
-TCL_PKG_ENV	= @LD_LIBRARY_PATH_VAR@=".:$(@LD_LIBRARY_PATH_VAR@)" TCLLIBPATH="@TCLLIBPATH@" TCL8_5_TM_PATH='@TCL8_5_TM_PATH@' TCL8_6_TM_PATH='@TCL8_6_TM_PATH@'
+TCL_PKG_ENV	= @LD_LIBRARY_PATH_VAR@=".:$(@LD_LIBRARY_PATH_VAR@)" TCLLIBPATH="@TCLLIBPATH@" TCL8_5_TM_PATH='@TCL_TM_PATH@' TCL8_6_TM_PATH='@TCL_TM_PATH@'
 JIM_PKG_ENV	= JIMLIB="@JIMLIB@"
 TCLSH_PROG	= @TCLSH_PROG@
 TCLSH		= $(TCL_PKG_ENV) ${TCLSH_PROG}
@@ -93,13 +108,13 @@ SCRIPT		=
 
 TESTENV		= @TESTENV@
 TESTFWK		= @TESTFWK@
-TESTFLAGS	=
+TESTFLAGS	= @TESTFLAGS@
 
 DAT_MODE	= 644
 BIN_MODE	= 755
 DESTDIR		=
 INSTALL_OPTIONS	=
-INSTALL		= ${SH} ${srcdir}/tclconfig/install-sh -c $(INSTALL_OPTIONS)
+INSTALL		= ${SH} ${srcdir}/Spotoconf/install-sh -c $(INSTALL_OPTIONS)
 INSTALL_DATA_DIR = $(INSTALL) -d -m 755
 INSTALL_PROGRAM	= $(INSTALL) -m $(BIN_MODE)
 INSTALL_DATA	= $(INSTALL) -m $(DAT_MODE)
@@ -128,15 +143,13 @@ E		= $(EN)'\n'
 .man.html .man.n .man.1:
 	${DOCBLD} -o $@ ${DOCFMT} $<
 
-all: ${LIBDIR} ${SHLIB} ${SCLIB} ${PKGINDEX} ${DOC} ${SCBIN} ${EXT_BUILD}
-
-$(OBJ): $(SRC) ${EXT_DEP_FILES}
+.c.o:
 	${CC} \
 	-c \
 	${CFLAGS_CC} \
 	${CFLAGS_WARN} \
 	${CFLAGS_TH} \
-	${CFLAGS_SH} \
+	${CFLAGS_BUILD} \
 	${CFLAGS_OPT} \
 	${CFLAGS_DEBUG} \
 	${DEFS} \
@@ -147,33 +160,78 @@ $(OBJ): $(SRC) ${EXT_DEP_FILES}
 	$(INC_SPEC) \
 	-o $@ $<
 
-${SHLIB}: $(OBJ)
+all: ${BUILD_DIR} shlib ${STLIB} ${SCLIB} ${PKGINDEX} ${DOC} ${SCBIN} ${BIN} ${EXT_BUILD}
+
+${LIBOBJ}: ${LIBSRC} ${EXT_DEP_FILES}
+
+shlib: ${SHLIB}
+
+${SHLIB}: ${LIBOBJ}
 	${CC} \
 	${CFLAGS_CC} \
-	${CFLAGS_SH} \
+	${CFLAGS_BUILD} \
 	${CFLAGS_WARN} \
 	${CFLAGS_OPT} \
 	${LDFLAGS} \
-	${LDFLAGS_SH} \
+	${LDFLAGS_BUILD} \
 	-o $@ \
-	$(OBJ) \
+	${LIBOBJ} \
 	${LIBS_TH} \
 	$(LIB_SPEC)
 
-bje:
-	${BJE} --keep --notest ${DEFS} ${DEFS_OPT} -o ${PKG_NAME} ${srcdir}/generic/$(SRC)
+${STLIB}: ${LIBOBJ}
+	rm -f $@
+	${AR} cr $@ ${LIBOBJ}
+	${RANLIB} $@
 
-${LIBDIR}: ${LIBDIR}
-	$(INSTALL_DATA_DIR) ${LIBDIR}
+${SCLIB}: ${SCLIBSRCDIR}/${SCLIBSRC}
+	@MAKE_SCLIB@
 
-${SCLIB}: ${SCLIBSRC}
-	@BUILD_SCLIB@
+${BIN}: ${BINOBJ}
+	${CC} \
+	${CFLAGS_WARN} \
+	${CFLAGS_OPT} \
+	${LDFLAGS} \
+	${LDFLAGS_BUILD} \
+	-o $@ \
+	${BINOBJ} \
+	${LIBS_TH} \
+	$(LIB_SPEC)
 
 ${SCBIN}: ${SCBINSRC}
-	@BUILD_SCBIN@
+	@MAKE_SCBIN@
+
+bje:
+	${BJE} --keep --notest ${DEFS} ${DEFS_OPT} -o ${PKG_NAME} ${srcdir}/generic/${LIBSRC}
+
+spotoshell: ${srcdir}/Spotoconf/spotoshell.c ${LIB}
+	${CC} \
+	${CFLAGS_CC} \
+	${CFLAGS_WARN} \
+	${CFLAGS_TH} \
+	${CFLAGS_OPT} \
+	${CFLAGS_DEBUG} \
+	${DEFS} \
+	${DEFS_TH} \
+	${DEFS_OPT} \
+	${EXT_DEFS} \
+	${DEFS_SPOT} \
+	$(INC_SPEC) \
+	$(TCL_LIB_SPEC) \
+	$(TK_LIB_SPEC) \
+	$(LD_LIB_SPEC) \
+	${LIB} \
+	${LDFLAGS} \
+	${LDFLAGS_BUILD} \
+	-DINIT=\"${INIT}\" \
+	-DPACKAGE_INIT=${INIT}_Init \
+	-o $@ $<
+
+${BUILD_DIR}: ${BUILD_DIR}
+	$(INSTALL_DATA_DIR) ${BUILD_DIR}
 
 ${DOC}: ${srcdir}/doc/${DOC}
-	@BUILD_DOC@
+	@MAKE_DOC@
 
 pkgIndex.tcl:
 	$(E) 'package ifneeded ${PKG_NAME} ${VERSION} [list @LOAD_LIB@ [file join $$dir ${LIB}] ${INIT}]' > pkgIndex.tcl
@@ -198,7 +256,7 @@ configure:
 clean-:
 
 clean-pkgIndex.tcl:
-	rm -f @PKGINDEX@
+	rm -f ${PKGINDEX}
 
 clean-cfg_pkgIndex.tcl:
 	rm -f pkgIndex.tcl
@@ -209,15 +267,15 @@ clean-doc:
 	fi
 
 clean-spot: clean-@PKGINDEX@ clean-doc
-	rm -f ${SHLIB} ${OBJ} *.core
+	rm -f ${SHLIB} ${STLIB} ${BIN} ${LIBOBJ} ${BINOBJ} *.core spotoshell
 	if test X"${SCLIB}" != X"" && test -h "${SCLIB}" ; then \
 	    rm -f "${SCLIB}" ; \
 	fi
 	if test X"${SCBIN}" != X"" && test -h "${SCBIN}" ; then \
 	    rm -f "${SCBIN}" ; \
 	fi
-	if test X"${LIBDIR}" != X"" && test -d "${LIBDIR}" ; then \
-	    rmdir -p "${LIBDIR}" ; \
+	if test X"${BUILD_DIR}" != X"" && test -d "${BUILD_DIR}" ; then \
+	    rmdir -p "${BUILD_DIR}" ; \
 	fi
 
 distclean-spot: clean clean-@CFG_PKGINDEX@
@@ -241,7 +299,7 @@ test-Tcl: all
 	${TESTENV} $(TCLSH) ${srcdir}/tests/${TESTFWK} $(TESTFLAGS)
 
 test-Jim: all
-	for p in ${srcdir}/tests/*.test; do ${TESTENV} $(JIMSH) $$p $(TESTFLAGS); done
+	for f in ${srcdir}/tests/*.test; do ${TESTENV} $(JIMSH) $$f $(TESTFLAGS); done
 
 test-spot: test-@FOR_WHAT@
 
@@ -261,10 +319,10 @@ install-lib:
 	@$(INSTALL_DATA_DIR) $(DESTDIR)${PKG_INSTALL_DIR}
 	@$(EN) $(INDENT)
 	@$(EN) "${LIB} "
-	@$(INSTALL_LIBRARY) ${LIBDIR}${LIB} $(DESTDIR)${PKG_INSTALL_DIR}
-	@if test X"@PKGINDEX@" != X"" ; then \
-	    $(EN) "@PKGINDEX@"; \
-	    $(INSTALL_DATA) @PKGINDEX@ $(DESTDIR)${PKG_INSTALL_DIR}; \
+	@$(INSTALL_LIBRARY) ${BUILD_DIR}${LIB} $(DESTDIR)${PKG_INSTALL_DIR}
+	@if test X"${PKGINDEX}" != X"" ; then \
+	    $(EN) "${PKGINDEX}"; \
+	    $(INSTALL_DATA) ${PKGINDEX} $(DESTDIR)${PKG_INSTALL_DIR}; \
 	fi
 	@$(E) ''
 
@@ -272,10 +330,21 @@ install-script-bin:
 	@$(P) 'Installing %s files in %s\n' 'script bin' $(DESTDIR)${bindir}/
 	@$(INSTALL_DATA_DIR) $(DESTDIR)${bindir}
 	@$(EN) $(INDENT)
-	@list='${SCBIN}'; \
-	for p in $$list; do \
-	    $(EN) "$$p "; \
-	    $(INSTALL_SCRIPT) $$p $(DESTDIR)${bindir}; \
+	@files='${SCBIN}'; \
+	for f in $$files; do \
+	    $(EN) "$$f "; \
+	    $(INSTALL_SCRIPT) $$f $(DESTDIR)${bindir}; \
+	done
+	@$(E) ''
+
+install-bin:
+	@$(P) 'Installing %s files in %s\n' bin $(DESTDIR)${bindir}/
+	@$(INSTALL_DATA_DIR) $(DESTDIR)${bindir}
+	@$(EN) $(INDENT)
+	@files='${BIN}'; \
+	for f in $$files; do \
+	    $(EN) "$$f "; \
+	    $(INSTALL_PROGRAM) $$f $(DESTDIR)${bindir}; \
 	done
 	@$(E) ''
 
@@ -283,10 +352,10 @@ install-doc:
 	@$(P) 'Installing %s files in %s\n' doc $(DESTDIR)${DOC_INSTALL_DIR}/
 	@$(INSTALL_DATA_DIR) $(DESTDIR)${DOC_INSTALL_DIR}
 	@$(EN) $(INDENT)
-	@list='${DOC}'; \
-	for p in $$list; do \
-	    $(EN) "$$p "; \
-	    $(INSTALL_DATA) $$p $(DESTDIR)${DOC_INSTALL_DIR}; \
+	@files='${DOC}'; \
+	for f in $$files; do \
+	    $(EN) "$$f "; \
+	    $(INSTALL_DATA) $$f $(DESTDIR)${DOC_INSTALL_DIR}; \
 	done
 	@$(E) ''
 
@@ -294,15 +363,17 @@ install-exa:
 	@$(P) 'Installing %s files in %s\n' example $(DESTDIR)${exadir}/
 	@$(INSTALL_DATA_DIR) $(DESTDIR)${exadir}
 	@$(EN) $(INDENT)
-	@DIR=examples; \
-	list='@EXA@'; \
-	for p in $$list; do \
-	    $(EN) "$$p "; \
-	    if test -x ${srcdir}/$$DIR/$$p; then \
-		$(INSTALL_SCRIPT) ${srcdir}/$$DIR/$$p $(DESTDIR)${exadir}; \
-	    else \
-		$(INSTALL_DATA) ${srcdir}/$$DIR/$$p $(DESTDIR)${exadir}; \
-	    fi; \
+	@d=examples; \
+	files='${EXA_FILES}'; \
+	for f in $$files; do \
+	    $(EN) "$$f "; \
+	    $(INSTALL_DATA) ${srcdir}/$$d/$$f $(DESTDIR)${exadir}; \
+	done
+	@d=examples; \
+	files='${EXA_SCRIPTS}'; \
+	for f in $$files; do \
+	    $(EN) "$$f "; \
+	    $(INSTALL_SCRIPT) ${srcdir}/$$d/$$f $(DESTDIR)${exadir}; \
 	done
 	@$(E) ''
 
@@ -310,17 +381,17 @@ install-dat:
 	@$(P) 'Installing %s files in %s\n' dat $(DESTDIR)${datdir}/
 	@$(INSTALL_DATA_DIR) $(DESTDIR)${datdir}
 	@$(EN) $(INDENT)
-	@DIR="@DAT_DIR@"; \
-	list='@DAT_FILES@'; \
-	for p in $$list; do \
-	    op=$$p; \
-	    p=$$DIR/$$p; \
-	    DDIR=`dirname $$p`; \
-	    if ! test -d $(DESTDIR)${datdir}/$$DDIR; then \
-		$(INSTALL_DATA_DIR) $(DESTDIR)${datdir}/$$DDIR; \
+	@d="@DAT_DIR@"; \
+	files='${DAT_FILES}'; \
+	for f in $$files; do \
+	    of=$$f; \
+	    f=$$d/$$f; \
+	    dd=`dirname $$f`; \
+	    if ! test -d $(DESTDIR)${datdir}/$$dd; then \
+		$(INSTALL_DATA_DIR) $(DESTDIR)${datdir}/$$dd; \
 	    fi; \
-	    $(EN) "$$op "; \
-	    $(INSTALL_DATA) ${srcdir}/$$p $(DESTDIR)${datdir}/$$DDIR/; \
+	    $(EN) "$$of "; \
+	    $(INSTALL_DATA) ${srcdir}/$$f $(DESTDIR)${datdir}/$$dd/; \
 	done
 	@$(E) ''
 
@@ -339,103 +410,111 @@ dist-compress:
 	tar zcvf $(DIST_ROOT)/$(DIST_FILE) -C $(DIST_ROOT) $(DIST_NAME)
 
 dist-spot:
-	list='LICENSE README README.licenses Makefile.in spoto.conf @EXT_CONF_FILES@'; \
-	for p in $$list; do \
-	    $(DIST_INSTALL_DATA) ${srcdir}/$$p $(DIST_DIR)/; \
+	files='LICENSE README README.licenses Makefile.in'; \
+	for f in $$files; do \
+	    $(DIST_INSTALL_DATA) ${srcdir}/$$f $(DIST_DIR)/; \
 	done
 	$(DIST_INSTALL_SCRIPT) ${srcdir}/configure $(DIST_DIR)/
-	$(INSTALL_DATA_DIR) $(DIST_DIR)/tclconfig
-	DIR=tclconfig; \
-	list='install-sh'; \
-	for p in $$list; do \
-	    $(DIST_INSTALL_DATA) ${srcdir}/$$DIR/$$p $(DIST_DIR)/$$DIR/; \
+	$(INSTALL_DATA_DIR) $(DIST_DIR)/Spotoconf
+	d=Spotoconf; \
+	files='install-sh spotoshell.c'; \
+	for f in $$files; do \
+	    $(DIST_INSTALL_DATA) ${srcdir}/$$d/$$f $(DIST_DIR)/$$d/; \
 	done
-	list='Makefile.portobsd.in'; \
-	for p in $$list; do \
-	    if test -f ${srcdir}/$$p; then \
-		$(DIST_INSTALL_DATA) ${srcdir}/$$p $(DIST_DIR)/; \
+	files='Makefile.portobsd.in'; \
+	for f in $$files; do \
+	    if test -f ${srcdir}/$$f; then \
+		$(DIST_INSTALL_DATA) ${srcdir}/$$f $(DIST_DIR)/; \
 	    fi; \
 	done
 
 dist-ext: dist-spot
-	list='RELEASE Makefile.${NAME}.in UNLICENSE'; \
-	for p in $$list; do \
-	    if test -f ${srcdir}/$$p; then \
-		$(DIST_INSTALL_DATA) ${srcdir}/$$p $(DIST_DIR)/; \
+	files='RELEASE UNLICENSE spoto.conf @EXT_CONF_FILES@ @EXT_MK_FILES@'; \
+	for f in $$files; do \
+	    if test -f ${srcdir}/$$f; then \
+		$(DIST_INSTALL_DATA) ${srcdir}/$$f $(DIST_DIR)/; \
 	    fi; \
 	done
-	DIR=library; \
-	list='${SCLIBSRC}'; \
-	if test -d ${srcdir}/$$DIR; then \
-	    $(INSTALL_DATA_DIR) $(DIST_DIR)/$$DIR; \
-	    for p in $$list; do \
-		$(DIST_INSTALL_DATA) ${srcdir}/$$DIR/$$p $(DIST_DIR)/$$DIR/; \
+	dirs='bin generic library src unix'; \
+	files='${LIBSRC} ${SCLIBSRC} ${BINSRC} ${SCBINSRC} pkgIndex.tcl'; \
+	for f in $$files; do \
+	    for d in $$dirs; do \
+		if test -f ${srcdir}/$$d/$$f; then \
+		    if ! test -d $(DIST_DIR)/$$d; then \
+			$(INSTALL_DATA_DIR) $(DIST_DIR)/$$d; \
+		    fi; \
+		    $(DIST_INSTALL_DATA) ${srcdir}/$$d/$$f $(DIST_DIR)/$$d/; \
+		fi; \
 	    done; \
-	fi
-	DIR=library; \
-	list='pkgIndex.tcl'; \
-	if test -d ${srcdir}/$$DIR; then \
-	    $(INSTALL_DATA_DIR) $(DIST_DIR)/$$DIR; \
-	    for p in $$list; do \
-		if test -f ${srcdir}/$$DIR/$$p; then \
-		    $(DIST_INSTALL_DATA) ${srcdir}/$$DIR/$$p $(DIST_DIR)/$$DIR/; \
+	done
+	d=doc; \
+	files='${NAME}.man ${NAME}.1 ${NAME}.3 ${NAME}.n ${NAME}.html'; \
+	if test -d ${srcdir}/$$d; then \
+	    $(INSTALL_DATA_DIR) $(DIST_DIR)/$$d; \
+	    for f in $$files; do \
+		if test -f ${srcdir}/$$d/$$f; then \
+		  $(DIST_INSTALL_DATA) ${srcdir}/$$d/$$f $(DIST_DIR)/$$d/; \
 		fi; \
 	    done; \
 	fi
-	DIR=bin; \
-	list='${SCBINSRC}'; \
-	if test -d ${srcdir}/$$DIR; then \
-	    $(INSTALL_DATA_DIR) $(DIST_DIR)/$$DIR; \
-	    for p in $$list; do \
-	        $(DIST_INSTALL_SCRIPT) ${srcdir}/$$DIR/$$p $(DIST_DIR)/$$DIR/; \
+	d=tests; \
+	if test X"@TEST@" != X"" && test X"@TEST@" != X"pkgs-test" && test -d ${srcdir}/$$d; then \
+	    $(INSTALL_DATA_DIR) $(DIST_DIR)/$$d; \
+	    files='@TESTFILES@'; \
+	    for f in $$files; do \
+		$(DIST_INSTALL_DATA) ${srcdir}/$$d/$$f $(DIST_DIR)/$$d/; \
 	    done; \
-	fi
-	DIR=doc; \
-	list='${NAME}.man ${NAME}.n ${NAME}.html'; \
-	if test -d ${srcdir}/$$DIR; then \
-	    $(INSTALL_DATA_DIR) $(DIST_DIR)/$$DIR; \
-	    for p in $$list; do \
-		$(DIST_INSTALL_DATA) ${srcdir}/$$DIR/$$p $(DIST_DIR)/$$DIR/; \
-	    done; \
-	fi
-	DIR=tests; \
-	list='${TESTFWK} ${PKG_NAME}.test'; \
-	if test X"@TEST@" != X"" && test -d ${srcdir}/$$DIR; then \
-	    $(INSTALL_DATA_DIR) $(DIST_DIR)/$$DIR; \
-	    for p in $$list; do \
-		$(DIST_INSTALL_DATA) ${srcdir}/$$DIR/$$p $(DIST_DIR)/$$DIR/; \
-	    done; \
-	fi
-	DIR=examples; \
-	list='@EXA@'; \
-	if test -d ${srcdir}/$$DIR; then \
-	    $(INSTALL_DATA_DIR) $(DIST_DIR)/$$DIR; \
-	    for p in $$list; do \
-		if test -x ${srcdir}/$$DIR/$$p; then \
-		    $(DIST_INSTALL_SCRIPT) ${srcdir}/$$DIR/$$p $(DIST_DIR)/$$DIR/; \
-		else \
-		    $(DIST_INSTALL_DATA) ${srcdir}/$$DIR/$$p $(DIST_DIR)/$$DIR/; \
+	    files='all.tcl testing.tcl'; \
+	    for f in $$files; do \
+		if test -f ${srcdir}/$$d/$$f; then \
+		    $(DIST_INSTALL_DATA) ${srcdir}/$$d/$$f $(DIST_DIR)/$$d/; \
 		fi; \
 	    done; \
 	fi
-	DIR='${DAT_DIR}'; \
-	list='${DAT_FILES}'; \
-	for p in $$list; do \
-	    op=$$p; \
-	    p=$$DIR/$$p; \
-	    DDIR=`dirname $$p`; \
-	    if ! test -d ${srcdir}/$$DDIR; then continue; fi; \
-	    if ! test -d $(DIST_DIR)/$$DDIR; then \
-		$(INSTALL_DATA_DIR) $(DIST_DIR)/$$DDIR; \
+	d=examples; \
+	files='${EXA_FILES}'; \
+	if test X"$$files" != X"" && test -d ${srcdir}/$$d; then \
+	    $(INSTALL_DATA_DIR) $(DIST_DIR)/$$d; \
+	    for f in $$files; do \
+		$(DIST_INSTALL_DATA) ${srcdir}/$$d/$$f $(DIST_DIR)/$$d/; \
+	    done; \
+	fi
+	d=examples; \
+	files='${EXA_SCRIPTS}'; \
+	if test X"$$files" != X"" && test -d ${srcdir}/$$d; then \
+	    $(INSTALL_DATA_DIR) $(DIST_DIR)/$$d; \
+	    for f in $$files; do \
+		$(DIST_INSTALL_SCRIPT) ${srcdir}/$$d/$$f $(DIST_DIR)/$$d/; \
+	    done; \
+	fi
+	d='${DAT_DIR}'; \
+	files='${DAT_FILES}'; \
+	for f in $$files; do \
+	    of=$$f; \
+	    f=$$d/$$f; \
+	    dd=`dirname $$f`; \
+	    if ! test -d ${srcdir}/$$dd; then continue; fi; \
+	    if ! test -d $(DIST_DIR)/$$dd; then \
+		$(INSTALL_DATA_DIR) $(DIST_DIR)/$$dd; \
 	    fi; \
-	    $(DIST_INSTALL_DATA) ${srcdir}/$$p $(DIST_DIR)/$$DDIR/; \
+	    $(DIST_INSTALL_DATA) ${srcdir}/$$f $(DIST_DIR)/$$dd/; \
 	done
-	DIR=thatch; \
-	list='mkthatch'; \
-	if test -d ${srcdir}/$$DIR; then \
-	    $(INSTALL_DATA_DIR) $(DIST_DIR)/$$DIR; \
-	    for p in $$list; do \
-		$(DIST_INSTALL_DATA) ${srcdir}/$$DIR/$$p $(DIST_DIR)/$$DIR/; \
+	d=ezt; \
+	files='README UNLICENSE \
+	      ezt.h ezt_init.c ezt_funcs.c ezt_tj.h \
+	      ezt_eagain_ewouldblock.h ezt_int2ptr_ptr2int.h'; \
+	if test -d ${srcdir}/$$d; then \
+	    $(INSTALL_DATA_DIR) $(DIST_DIR)/$$d; \
+	    for f in $$files; do \
+		$(DIST_INSTALL_DATA) ${srcdir}/$$d/$$f $(DIST_DIR)/$$d/; \
+	    done; \
+	fi
+	d=thatch; \
+	files='mkthatch'; \
+	if test -d ${srcdir}/$$d; then \
+	    $(INSTALL_DATA_DIR) $(DIST_DIR)/$$d; \
+	    for f in $$files; do \
+		$(DIST_INSTALL_DATA) ${srcdir}/$$d/$$f $(DIST_DIR)/$$d/; \
 	    done; \
 	fi
 
@@ -451,6 +530,6 @@ dist-check:
 .PHONY: result thatch dist-check print-dist-name
 .PHONY: @CLEAN@ @DISTCLEAN@
 
-# Spot o' Conf 0.9
+# Spot o' Conf 0.91
 
 # EOF

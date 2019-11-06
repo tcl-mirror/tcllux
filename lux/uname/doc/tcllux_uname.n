@@ -1,8 +1,8 @@
 '\"
 '\" Generated from file 'tcllux_uname\&.man' by tcllib/doctools with format 'nroff'
-'\" Copyright (c) 2018 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
+'\" Copyright (c) 2019 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
 '\"
-.TH "tcllux::uname" n 1\&.0 tcllux_uname "tcllux::uname"
+.TH "tcllux::uname" n 0\&.5 tcllux_uname "tcllux::uname"
 .\" The -*- nroff -*- definitions below are for supplemental macros used
 .\" in Tcl/Tk manual entries.
 .\"
@@ -276,7 +276,7 @@ tcllux::uname \- TclLux uname
 .SH SYNOPSIS
 package require \fBTcl  8\&.6\fR
 .sp
-package require \fBtcllux::uname  ?1\&.0?\fR
+package require \fBtcllux::uname  ?0\&.5?\fR
 .sp
 namespace import ::tcllux::lux
 .sp
@@ -289,7 +289,7 @@ uname information\&.
 .SH COMMANDS
 .TP
 \fBlux uname\fR
-Returns a dict\&. Keys: sysname nodename release version machine\&.
+Returns a list of key-value pairs\&. Keys: sysname nodename release version machine\&.
 .PP
 .SH "SEE ALSO"
 uname(3)
@@ -299,6 +299,6 @@ uname, unix
 UNIX
 .SH COPYRIGHT
 .nf
-Copyright (c) 2018 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
+Copyright (c) 2019 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
 
 .fi

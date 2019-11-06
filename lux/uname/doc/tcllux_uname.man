@@ -1,10 +1,10 @@
-[manpage_begin tcllux::uname n 1.0]
+[manpage_begin tcllux::uname n 0.5]
 [require   Tcl 8.6]
-[require   tcllux::uname [opt 1.0]]
+[require   tcllux::uname [opt 0.5]]
 [moddesc   {tcllux::uname}]
 [titledesc {TclLux uname}]
 [category  {UNIX}]
-[copyright {2018 Stuart Cassoff <stwo@users.sourceforge.net>}]
+[copyright {2019 Stuart Cassoff <stwo@users.sourceforge.net>}]
 [keywords  unix uname]
 [see_also  uname(3)]
 
@@ -20,7 +20,7 @@
 [list_begin definitions]
 
 	[call [cmd {lux uname}]]
-		Returns a dict. Keys: sysname nodename release version machine.
+		Returns a list of key-value pairs. Keys: sysname nodename release version machine.
 
 [list_end]
 

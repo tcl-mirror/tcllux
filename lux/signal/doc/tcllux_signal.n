@@ -1,8 +1,8 @@
 '\"
 '\" Generated from file 'tcllux_signal\&.man' by tcllib/doctools with format 'nroff'
-'\" Copyright (c) 2018 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
+'\" Copyright (c) 2019 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
 '\"
-.TH "tcllux::signal" n 1\&.0 tcllux_signal "tcllux::signal"
+.TH "tcllux::signal" n 0\&.5 tcllux_signal "tcllux::signal"
 .\" The -*- nroff -*- definitions below are for supplemental macros used
 .\" in Tcl/Tk manual entries.
 .\"
@@ -276,7 +276,7 @@ tcllux::signal \- TclLux signal
 .SH SYNOPSIS
 package require \fBTcl  8\&.6\fR
 .sp
-package require \fBtcllux::signal  ?1\&.0?\fR
+package require \fBtcllux::signal  ?0\&.5?\fR
 .sp
 namespace import ::tcllux::lux
 .sp
@@ -295,9 +295,8 @@ A signal name is case-insensitive and may be prefixed with "sig"\&.
 .SH COMMANDS
 .TP
 \fBlux signal signals\fR
-Returns a list of dicts\&.
-Keys: name\&. Values: descr\&.
-Index in list is signal number\&.
+Returns a list of 3-element lists\&.
+Columns: name, number description\&.
 .TP
 \fBlux signal set\fR \fIsignal\fR ?\fIaction\fR? ?\fIsend\fR?
 Returns signal info if only \fIsignal\fR supplied\&.
@@ -305,14 +304,45 @@ If \fIaction\fR is \fBdefault\fR then the system default action will be taken up
 If \fIaction\fR is \fBignore\fR then the signal will be ignored\&.
 If \fIaction\fR is a Tcl channel then data will be written to the channel upon receipt of the signal\&.
 If \fIsend\fR is \fBsignal\fR then the signal number will be written to the channel as one byte\&.
-If \fIsend\fR is \fBtimestamp\fR then a timestamp (seconds and nanoseconds) of when the signal was received will be written to the channel as two longs\&.
+If \fIsend\fR is \fBtimestamp\fR then a timestamp (seconds and nanoseconds) of when the signal was received will be written to the channel as two uint64_t (128 bytes)\&.
 The default for \fIsend\fR is \fBsignal\fR\&.
+Attempting to set signal 0 does nothing\&.
 Returns an empty string\&.
 .TP
 \fBlux signal send\fR \fIsignal\fR \fIpid\fR
 Send signal \fIsignal\fR to process \fIpid\fR\&.
+Signal 0 can be used for pid checks\&.
 Returns an empty string\&.
 .PP
+.SH EXAMPLES
+.CS
+
+
+proc sigreceiver {chan send} {
+	if {$send eq "timestamp"} {
+		binary scan [read $chan 16] mm s ns
+		puts $s\&.$ns
+	} elseif {$send eq "signal"} {
+		binary scan [read $chan 1] c s
+		puts $s
+	}
+}
+
+proc sigsetup {sig} {
+	set send signal
+	#set send timestamp
+	lassign [chan pipe] r w
+	chan configure $r -translation binary -blocking 0
+	chan configure $w -translation binary -blocking 0
+	fileevent $r readable [list sigreceiver $r $send]
+	lux signal set $sig $w $send
+}
+
+sigsetup hup
+
+lux signal send hup [pid]
+
+.CE
 .SH "SEE ALSO"
 signal(3)
 .SH KEYWORDS
@@ -321,6 +351,6 @@ signal, unix
 UNIX
 .SH COPYRIGHT
 .nf
-Copyright (c) 2018 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
+Copyright (c) 2019 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
 
 .fi

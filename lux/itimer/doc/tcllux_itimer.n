@@ -1,8 +1,8 @@
 '\"
 '\" Generated from file 'tcllux_itimer\&.man' by tcllib/doctools with format 'nroff'
-'\" Copyright (c) 2018 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
+'\" Copyright (c) 2019 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
 '\"
-.TH "itimer" n 1\&.0 tcllux_itimer "lux itimer"
+.TH "itimer" n 0\&.5 tcllux_itimer "lux itimer"
 .\" The -*- nroff -*- definitions below are for supplemental macros used
 .\" in Tcl/Tk manual entries.
 .\"
@@ -276,7 +276,7 @@ itimer \- TclLux itimer
 .SH SYNOPSIS
 package require \fBTcl  8\&.6\fR
 .sp
-package require \fBtcllux::itimer  ?1\&.0?\fR
+package require \fBtcllux::itimer  ?0\&.5?\fR
 .sp
 namespace import ::tcllux::lux
 .sp
@@ -306,6 +306,6 @@ itimer, unix
 UNIX
 .SH COPYRIGHT
 .nf
-Copyright (c) 2018 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
+Copyright (c) 2019 Stuart Cassoff <stwo@users\&.sourceforge\&.net>
 
 .fi

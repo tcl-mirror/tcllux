@@ -44,7 +44,7 @@ TCMD(Tcllux_uname_uname_Cmd);
 /***/
 
 TCMD(Tcllux_uname_uname_Cmd) {
-	Tcl_Obj *d;
+	Tcl_Obj *l;
 	struct utsname u;
 
 	if (objc != 1) {
@@ -55,21 +55,22 @@ TCMD(Tcllux_uname_uname_Cmd) {
 		return rperr("Couldn't get uname: ");
 	}
 
-	d = Tcl_NewDictObj();
-	Tcl_IncrRefCount(d);
+	l = Tcl_NewListObj(0, NULL);
+	Tcl_IncrRefCount(l);
 
-#define MyDictPutString(K,V) Tcl_DictObjPut(NULL,d,Tcl_NewStringObj((K),-1),Tcl_NewStringObj((V),-1))
+#define LPUTKV(K,V) { Tcl_ListObjAppendElement(NULL,l,Tcl_NewStringObj((K),-1)); \
+		      Tcl_ListObjAppendElement(NULL,l,Tcl_NewStringObj((V),-1)); }
 
-	MyDictPutString("sysname",  u.sysname);
-	MyDictPutString("nodename", u.nodename);
-	MyDictPutString("release",  u.release);
-	MyDictPutString("version",  u.version);
-	MyDictPutString("machine",  u.machine);
+	LPUTKV("sysname",  u.sysname);
+	LPUTKV("nodename", u.nodename);
+	LPUTKV("release",  u.release);
+	LPUTKV("version",  u.version);
+	LPUTKV("machine",  u.machine);
 
-#undef MyDictPutString
+#undef LPUTKV
 
-	Tcl_SetObjResult(interp, d);
-	Tcl_DecrRefCount(d);
+	Tcl_SetObjResult(interp, l);
+	Tcl_DecrRefCount(l);
 
 	return TCL_OK;
 }
